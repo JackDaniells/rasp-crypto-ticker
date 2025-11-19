@@ -208,3 +208,6 @@ __marimo__/
 
 # launcher file
 launcher.sh
+
+# log files
+*.log
