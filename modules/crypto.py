@@ -1,9 +1,9 @@
 """Crypto module for displaying cryptocurrency prices"""
 
 import time
-import requests
 from datetime import datetime
 from .base import BaseModule
+from clients import get_crypto_prices
 
 
 class CryptoModule(BaseModule):
@@ -27,40 +27,15 @@ class CryptoModule(BaseModule):
         """Fetch cryptocurrency prices from CoinGecko API"""
         # Get CoinGecko IDs from the dict values
         coingecko_ids = ','.join(self.symbols.values())
-        params = {
-            'ids': coingecko_ids,
-            'vs_currencies': self.fiat,
-            'include_24hr_change': 'true',
-            'precision': '2'
-        }
         
-        try:
-            res = requests.get(
-                "https://api.coingecko.com/api/v3/simple/price",
-                params=params,
-                timeout=self.timeout
-            )
-            if res.status_code == 200:
-                data = res.json()
-                print(f"Crypto data fetched: {list(data.keys())}")
-                return data
-            else:
-                print(f"Crypto API error: {res.status_code}")
-                return self._get_error_data()
-        except Exception as e:
-            print(f"Error fetching crypto prices: {e}")
-            return self._get_error_data()
-    
-    def _get_error_data(self):
-        """Return error data structure"""
-        error_data = {}
-        # Use CoinGecko IDs (dict values) for error data structure
-        for coingecko_id in self.symbols.values():
-            error_data[coingecko_id] = {
-                self.fiat: 'Error',
-                f'{self.fiat}_24h_change': 0
-            }
-        return error_data
+        # Client returns None on failure
+        data = get_crypto_prices(
+            coingecko_ids=coingecko_ids,
+            fiat_currency=self.fiat,
+            timeout=self.timeout
+        )
+        
+        return data
     
     def display(self):
         """Display cryptocurrency information"""
@@ -86,19 +61,20 @@ class CryptoModule(BaseModule):
         self.lcd.cursor_pos = (0, 0)
         self.lcd.write_string(now.strftime("%H:%M"))
         
-        # Display 24h change percentage
+        # Display 24h change percentage (use dummy value if missing)
         change_key = f'{self.fiat}_24h_change'
-        if change_key in data:
-            variation = str(round(data[change_key], 1))
-            self.lcd.cursor_pos = (0, self.lcd_max_size - len(variation) - 1)
-            self.lcd.write_string(f"{variation}%")
+        variation = str(round(data.get(change_key, 0), 1))
+        
+        self.lcd.cursor_pos = (0, self.lcd_max_size - len(variation) - 1)
+        self.lcd.write_string(f"{variation}%")
         
         # Display crypto acronym (e.g., 'BTC')
         self.lcd.cursor_pos = (1, 0)
         self.lcd.write_string(f"{acronym}:")
         
-        # Display crypto value
-        value = str(data[self.fiat])
+        # Display crypto value (use dummy value if missing)
+        value = str(data.get(self.fiat, '--'))
+        
         self.lcd.cursor_pos = (1, self.lcd_max_size - len(value) - 1)
         self.lcd.write_string(f"${value}")
     

@@ -28,7 +28,8 @@ WEATHER_MODULE_CONFIG = {
     'update_interval': 600,
     'display_duration': 10,
     'timeout': 10,
-    'lcd_max_size': LCD_CONFIG['max_size']
+    'lcd_max_size': LCD_CONFIG['max_size'],
+    'max_failed_attempts': 3  # Show error after 3 consecutive API failures
 }
 
 # ============================================================================
@@ -45,7 +46,8 @@ CRYPTO_MODULE_CONFIG = {
     'update_interval': 600,
     'display_duration': 10,
     'timeout': 10,
-    'lcd_max_size': LCD_CONFIG['max_size']
+    'lcd_max_size': LCD_CONFIG['max_size'],
+    'max_failed_attempts': 3  # Show error after 3 consecutive API failures
 }
 
 # ============================================================================

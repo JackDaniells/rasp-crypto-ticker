@@ -1,7 +1,6 @@
 """Modular Crypto Ticker - Main Application"""
 
 import time
-import requests
 from RPLCD.i2c import CharLCD
 
 from config import (
@@ -11,8 +10,9 @@ from config import (
     APP_CONFIG,
     MODULE_ORDER
 )
-from modules.weather_time import WeatherModule
+from modules.weather import WeatherModule
 from modules.crypto import CryptoModule
+from clients import get_ip_address
 
 
 def lcd_write_string_centered(lcd, row, text, max_size=16):
@@ -40,25 +40,13 @@ def init_lcd(version):
     return lcd
 
 
-def get_ip_address():
-    """Attempt to get IP address from ipinfo.io
+def fetch_ip_address():
+    """Attempt to get IP address from ipify API
     
     Returns:
         str: IP address if successful, None otherwise
     """
-    try:
-        res = requests.get(
-            "http://ipinfo.io/ip",
-            timeout=APP_CONFIG['connection_timeout']
-        )
-        if res.status_code == 200:
-            return res.text.strip()
-        else:
-            print(f"Connection error: {res.status_code}")
-            return None
-    except Exception as e:
-        print(f"Connection error: {e}")
-        return None
+    return get_ip_address(timeout=APP_CONFIG['connection_timeout'])
 
 
 def establish_connection(lcd):
@@ -68,7 +56,7 @@ def establish_connection(lcd):
     
     while ip is None:
         lcd_write_string_centered(lcd, 0, "Connecting...", LCD_CONFIG['max_size'])
-        ip = get_ip_address()
+        ip = fetch_ip_address()
         
         if ip is None:
             lcd.clear()
