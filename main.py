@@ -12,7 +12,7 @@ from config import (
     MODULE_ORDER
 )
 from modules.weather_time import WeatherModule
-from modules.crypto_module import CryptoModule
+from modules.crypto import CryptoModule
 
 
 def lcd_write_string_centered(lcd, row, text, max_size=16):
@@ -40,35 +40,43 @@ def init_lcd(version):
     return lcd
 
 
+def get_ip_address():
+    """Attempt to get IP address from ipinfo.io
+    
+    Returns:
+        str: IP address if successful, None otherwise
+    """
+    try:
+        res = requests.get(
+            "http://ipinfo.io/ip",
+            timeout=APP_CONFIG['connection_timeout']
+        )
+        if res.status_code == 200:
+            return res.text.strip()
+        else:
+            print(f"Connection error: {res.status_code}")
+            return None
+    except Exception as e:
+        print(f"Connection error: {e}")
+        return None
+
+
 def establish_connection(lcd):
     """Establish internet connection and return IP address"""
     lcd.clear()
-    connected = False
     ip = None
     
-    while not connected:
-        try:
-            lcd_write_string_centered(lcd, 0, "Connecting...", LCD_CONFIG['max_size'])
-            res = requests.get(
-                "http://ipinfo.io/ip",
-                timeout=APP_CONFIG['connection_timeout']
-            )
-            if res.status_code == 200:
-                connected = True
-                ip = res.text.strip()
-                print(f"Connected! IP: {ip}")
-            else:
-                print(f"Connection error: {res.status_code}")
-                lcd.clear()
-                lcd_write_string_centered(lcd, 0, "Error when get IP", LCD_CONFIG['max_size'])
-                lcd_write_string_centered(lcd, 1, "Retrying...", LCD_CONFIG['max_size'])
-                time.sleep(APP_CONFIG['retry_delay'])
-        except Exception as e:
-            print(f"Connection error: {e}")
+    while ip is None:
+        lcd_write_string_centered(lcd, 0, "Connecting...", LCD_CONFIG['max_size'])
+        ip = get_ip_address()
+        
+        if ip is None:
             lcd.clear()
-            lcd_write_string_centered(lcd, 0, "Connection failed", LCD_CONFIG['max_size'])
+            lcd_write_string_centered(lcd, 0, "Conn. error", LCD_CONFIG['max_size'])
             lcd_write_string_centered(lcd, 1, "Retrying...", LCD_CONFIG['max_size'])
             time.sleep(APP_CONFIG['retry_delay'])
+        else:
+            print(f"Connected! IP: {ip}")
     
     lcd.clear()
     lcd_write_string_centered(lcd, 0, "Connected!", LCD_CONFIG['max_size'])
@@ -96,25 +104,11 @@ def initialize_modules(lcd, ip):
     return modules
 
 
-def display_module_status(lcd, modules):
-    """Display which modules are active"""
+def display_module_error(lcd):
+    """Display error message when no modules are active"""
     lcd.clear()
-    enabled_modules = [name.capitalize() for name in modules.keys()]
-    
-    if enabled_modules:
-        modules_text = ", ".join(enabled_modules)
-        lcd_write_string_centered(lcd, 0, "Active Modules:", LCD_CONFIG['max_size'])
-        
-        # If text is too long, scroll or truncate
-        if len(modules_text) > LCD_CONFIG['max_size']:
-            lcd.cursor_pos = (1, 0)
-            lcd.write_string(modules_text[:LCD_CONFIG['max_size']])
-        else:
-            lcd_write_string_centered(lcd, 1, modules_text, LCD_CONFIG['max_size'])
-    else:
-        lcd_write_string_centered(lcd, 0, "No modules", LCD_CONFIG['max_size'])
-        lcd_write_string_centered(lcd, 1, "enabled!", LCD_CONFIG['max_size'])
-    
+    lcd_write_string_centered(lcd, 0, "No modules", LCD_CONFIG['max_size'])
+    lcd_write_string_centered(lcd, 1, "enabled!", LCD_CONFIG['max_size'])
     time.sleep(5)
 
 
@@ -131,13 +125,8 @@ def main():
     # Initialize modules
     modules = initialize_modules(lcd, ip)
     
-    # Display active modules
-    display_module_status(lcd, modules)
-    
     if not modules:
-        lcd.clear()
-        lcd_write_string_centered(lcd, 0, "No modules", LCD_CONFIG['max_size'])
-        lcd_write_string_centered(lcd, 1, "enabled!", LCD_CONFIG['max_size'])
+        display_module_error(lcd)
         print("No modules enabled. Check config.py")
         return
     

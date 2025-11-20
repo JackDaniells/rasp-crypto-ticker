@@ -3,7 +3,7 @@
 import time
 import requests
 from datetime import datetime
-from .base_module import BaseModule
+from .base import BaseModule
 
 
 class CryptoModule(BaseModule):
@@ -11,11 +11,17 @@ class CryptoModule(BaseModule):
     
     def __init__(self, lcd, config):
         super().__init__('Crypto', lcd, config)
-        # symbols is now a dict: {'BTC': 'bitcoin', 'ETH': 'ethereum'}
-        self.symbols = config.get('symbols', {'BTC': 'bitcoin', 'ETH': 'ethereum', 'SOL': 'solana'})
-        self.fiat = config.get('fiat', 'usd')
-        self.timeout = config.get('timeout', 10)
-        self.lcd_max_size = config.get('lcd_max_size', 16)
+        
+        # Validate required configuration
+        required_keys = ['symbols', 'fiat', 'timeout', 'lcd_max_size']
+        missing_keys = [key for key in required_keys if key not in config]
+        if missing_keys:
+            raise ValueError(f"Crypto module missing required config keys: {', '.join(missing_keys)}. Check config.py")
+        
+        self.symbols = config['symbols']
+        self.fiat = config['fiat']
+        self.timeout = config['timeout']
+        self.lcd_max_size = config['lcd_max_size']
     
     def fetch_data(self):
         """Fetch cryptocurrency prices from CoinGecko API"""
@@ -72,12 +78,7 @@ class CryptoModule(BaseModule):
                 time.sleep(self.display_duration)
     
     def _display_crypto(self, acronym, data):
-        """Display a single cryptocurrency
-        
-        Args:
-            acronym: Short display name (e.g., 'BTC', 'ETH')
-            data: Price data from API
-        """
+        """Display a single cryptocurrency"""
         self.lcd.clear()
         
         # Display time
@@ -92,7 +93,7 @@ class CryptoModule(BaseModule):
             self.lcd.cursor_pos = (0, self.lcd_max_size - len(variation) - 1)
             self.lcd.write_string(f"{variation}%")
         
-        # Display crypto acronym (already uppercase, e.g., 'BTC')
+        # Display crypto acronym (e.g., 'BTC')
         self.lcd.cursor_pos = (1, 0)
         self.lcd.write_string(f"{acronym}:")
         

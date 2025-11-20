@@ -19,9 +19,16 @@ class BaseModule(ABC):
         self.name = name
         self.lcd = lcd
         self.config = config
-        self.enabled = config.get('enabled', True)
-        self.update_interval = config.get('update_interval', 600)  # seconds
-        self.display_duration = config.get('display_duration', 10)  # seconds
+        
+        # Validate required base configuration
+        required_keys = ['enabled', 'update_interval', 'display_duration']
+        missing_keys = [key for key in required_keys if key not in config]
+        if missing_keys:
+            raise ValueError(f"{name} module missing required config keys: {', '.join(missing_keys)}. Check config.py")
+        
+        self.enabled = config['enabled']
+        self.update_interval = config['update_interval']  # seconds
+        self.display_duration = config['display_duration']  # seconds
         self.last_update = 0
         self.data = {}
     

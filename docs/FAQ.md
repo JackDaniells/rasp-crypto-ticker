@@ -356,7 +356,7 @@ See [ARCHITECTURE_GUIDE.md](ARCHITECTURE_GUIDE.md) for module architecture detai
 
 Yes! Edit the `display()` method in the module file. For example, to change crypto display:
 
-Edit `modules/crypto_module.py`, find the `_display_crypto()` method and customize the LCD output.
+Edit `modules/crypto.py`, find the `_display_crypto()` method and customize the LCD output.
 
 ### Can I add more than 3 cryptocurrencies?
 

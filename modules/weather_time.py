@@ -3,7 +3,7 @@
 import time
 import requests
 from datetime import datetime
-from .base_module import BaseModule
+from .base import BaseModule
 
 
 class WeatherModule(BaseModule):
@@ -11,10 +11,17 @@ class WeatherModule(BaseModule):
     
     def __init__(self, lcd, config):
         super().__init__('Weather', lcd, config)
-        self.api_key = config.get('api_key')
-        self.ip = config.get('ip')
-        self.timeout = config.get('timeout', 10)
-        self.lcd_max_size = config.get('lcd_max_size', 16)
+        
+        # Validate required configuration
+        required_keys = ['api_key', 'ip', 'timeout', 'lcd_max_size']
+        missing_keys = [key for key in required_keys if key not in config]
+        if missing_keys:
+            raise ValueError(f"Weather module missing required config keys: {', '.join(missing_keys)}. Check config.py")
+        
+        self.api_key = config['api_key']
+        self.ip = config['ip']
+        self.timeout = config['timeout']
+        self.lcd_max_size = config['lcd_max_size']
     
     def fetch_data(self):
         """Fetch weather data from weatherapi"""

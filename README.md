@@ -201,9 +201,9 @@ rasp-crypto-ticker/
 ├── main.py           ← Entry point (initializes LCD and runs display loop)
 ├── config.py         ← Centralized configuration (all settings in one file)
 ├── modules/          ← Display modules (independent, interchangeable)
-│   ├── base_module.py     → Abstract base class (defines module interface)
+│   ├── base.py            → Abstract base class (defines module interface)
 │   ├── weather_time.py    → Weather & time display module
-│   └── crypto_module.py   → Cryptocurrency price display module
+│   └── crypto.py          → Cryptocurrency price display module
 └── docs/             ← Documentation (setup guides and references)
 ```
 

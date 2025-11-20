@@ -38,7 +38,7 @@ rasp-crypto-ticker/
 ├── 📦 modules/                   ← Module directory
 │   ├── __init__.py
 │   │
-│   ├── 🏗️  base_module.py        ← BASE CLASS
+│   ├── 🏗️  base.py                ← BASE CLASS
 │   │   └── BaseModule (Abstract)
 │   │       ├── fetch_data()      [abstract]
 │   │       ├── display()         [abstract]
@@ -54,7 +54,7 @@ rasp-crypto-ticker/
 │   │       ├── _print_clock()
 │   │       └── _lcd_write_string_centered()
 │   │
-│   └── 💰 crypto_module.py       ← CRYPTO MODULE
+│   └── 💰 crypto.py               ← CRYPTO MODULE
 │       └── CryptoModule(BaseModule)
 │           ├── fetch_data()      → CoinGecko API
 │           ├── display()         → N screens (1 per coin)
@@ -77,9 +77,9 @@ rasp-crypto-ticker/
 | `launcher.sh` | File | Shell script for launching the application (used by systemd) | ~20 |
 | `requirements.txt` | File | Python package dependencies | ~5 |
 | `modules/` | Directory | Contains all display modules | - |
-| `modules/base_module.py` | File | Abstract base class for all modules | ~60 |
+| `modules/base.py` | File | Abstract base class for all modules | ~60 |
 | `modules/weather_time.py` | File | Weather and time display module | ~107 |
-| `modules/crypto_module.py` | File | Cryptocurrency price display module | ~108 |
+| `modules/crypto.py` | File | Cryptocurrency price display module | ~108 |
 | `docs/` | Directory | All project documentation | - |
 
 ---
@@ -199,20 +199,20 @@ Open for extension (new modules), closed for modification (no changes to base cl
 main.py
   ├─→ imports: config.py (all configs)
   ├─→ imports: modules.weather_time (WeatherModule)
-  ├─→ imports: modules.crypto_module (CryptoModule)
+  ├─→ imports: modules.crypto (CryptoModule)
   └─→ imports: RPLCD, socket, time
 
 modules/weather_time.py
-  ├─→ imports: modules.base_module (BaseModule)
+  ├─→ imports: modules.base (BaseModule)
   ├─→ imports: requests, datetime, time
   └─→ uses: WEATHER_MODULE_CONFIG from config.py
 
-modules/crypto_module.py
-  ├─→ imports: modules.base_module (BaseModule)
+modules/crypto.py
+  ├─→ imports: modules.base (BaseModule)
   ├─→ imports: requests, datetime, time
   └─→ uses: CRYPTO_MODULE_CONFIG from config.py
 
-modules/base_module.py
+modules/base.py
   ├─→ imports: time
   └─→ uses: No external dependencies
 
@@ -247,7 +247,7 @@ WeatherModule     CryptoModule
 
 ### BaseModule (Abstract Base Class)
 
-**File**: `modules/base_module.py`
+**File**: `modules/base.py`
 
 **Purpose**: Defines the common interface for all display modules
 
@@ -315,7 +315,7 @@ WEATHER_MODULE_CONFIG = {
 
 ### Crypto Module
 
-**File**: `modules/crypto_module.py`
+**File**: `modules/crypto.py`
 
 **Features:**
 - Multi-coin support (configurable)
@@ -378,7 +378,7 @@ nano modules/example.py
 import time
 import requests
 from datetime import datetime
-from .base_module import BaseModule
+from .base import BaseModule
 
 
 class StockModule(BaseModule):
@@ -558,7 +558,7 @@ Here's a complete template for a new module:
 import time
 import requests
 from datetime import datetime
-from .base_module import BaseModule
+from .base import BaseModule
 
 
 class CustomModule(BaseModule):
