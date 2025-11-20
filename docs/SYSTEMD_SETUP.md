@@ -240,51 +240,7 @@ python main.py
 # If it works, then set up the service
 ```
 
----
 
-## 🔄 Alternative Autostart Methods
-
-### Method 1: Using cron @reboot (Simple)
-
-If you don't need logging or automatic restarts:
-
-```bash
-# Edit crontab
-crontab -e
-
-# Add this line
-@reboot sleep 30 && /path_to_project/launcher.sh
-```
-
-**Pros:** Simple, easy to set up  
-**Cons:** No automatic restart, limited logging
-
----
-
-### Method 2: Using /etc/rc.local (Legacy)
-
-```bash
-sudo nano /etc/rc.local
-
-# Add before "exit 0"
-/path_to_project/launcher.sh &
-
-exit 0
-```
-
-**Pros:** Simple, works on older systems  
-**Cons:** Deprecated, no service management
-
----
-
-### Method 3: Using systemd (Recommended) ✅
-
-Already described above - best option for:
-- Automatic restart on failure
-- Proper logging
-- Service management
-- Dependency handling
-- Environment variables
 
 ---
 
@@ -397,11 +353,20 @@ sudo nano /etc/systemd/system/crypto_ticker.service  # Direct edit
 
 ---
 
-**For more information:**
+## 🔗 Related Documentation
+
+- **I2C Setup**: See [I2C_SETUP.md](I2C_SETUP.md)
+- **Architecture & Modules**: See [ARCHITECTURE_GUIDE.md](ARCHITECTURE_GUIDE.md)
+- **Configuration Guide**: See [CONFIGURATION_GUIDE.md](CONFIGURATION_GUIDE.md)
+- **Frequently Asked Questions**: See [FAQ.md](FAQ.md)
+- **Quick Start**: See [README.md](../README.md)
+
+---
+
+**External Resources:**
 - Systemd documentation: https://www.freedesktop.org/software/systemd/man/systemd.service.html
 - Raspberry Pi systemd guide: https://www.raspberrypi.org/documentation/linux/usage/systemd.md
 
 ---
 
-**Back to main README**: See [README.md](../README.md) for project overview and basic setup.
-
+**Back to main README**: [README.md](../README.md)

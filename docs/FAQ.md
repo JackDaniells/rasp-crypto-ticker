@@ -34,7 +34,7 @@ python main.py
 sudo systemctl start crypto_ticker.service
 ```
 
-See [SYSTEMD_SERVICE.md](SYSTEMD_SERVICE.md) for service setup.
+See [SYSTEMD_SETUP.md](SYSTEMD_SETUP.md) for service setup.
 
 ---
 
@@ -164,7 +164,7 @@ The weather module automatically detects your location using your IP address. No
 
 Currently, weather uses auto-detection via IP. To add custom location support, you'd need to modify `modules/weather_time.py`.
 
-See [MODULES_GUIDE.md](MODULES_GUIDE.md) for module customization.
+See [ARCHITECTURE_GUIDE.md](ARCHITECTURE_GUIDE.md) for module customization.
 
 ### Weather module is not working. What should I check?
 
@@ -216,13 +216,21 @@ Then reboot:
 sudo reboot
 ```
 
+> 📖 **For complete I2C setup instructions:**  
+> See **[I2C_SETUP.md](I2C_SETUP.md)** for comprehensive step-by-step guide
+
 ### LCD is not displaying anything. What should I check?
 
-1. **I2C is enabled** - See above
-2. **LCD is connected properly** - Check wiring
-3. **I2C address is correct** - Use `sudo i2cdetect -y 1`
-4. **LCD has power** - Check backlight
-5. **Contrast adjustment** - Turn the potentiometer on LCD module
+1. **I2C is enabled** - Run `sudo raspi-config` and enable I2C interface
+2. **Required libraries installed** - Run `sudo apt-get install -y i2c-tools python3-smbus`
+3. **LCD is connected properly** - Check all 4 wires (GND, VCC, SDA, SCL)
+4. **I2C address is correct** - Use `sudo i2cdetect -y 1` to find address
+5. **LCD has power** - Check backlight is on (means VCC and GND connected)
+6. **Contrast adjustment** - Turn the potentiometer on LCD module
+7. **Verify I2C device** - Run `ls /dev/i2c*` (should show `/dev/i2c-1`)
+
+> 📖 **For complete troubleshooting guide:**  
+> See **[I2C_SETUP.md](I2C_SETUP.md)** for comprehensive solutions to all I2C issues
 
 ### Can I use a different LCD size?
 
@@ -230,13 +238,23 @@ The code is optimized for 16x2 LCD. For other sizes (20x4, etc.), you'd need to:
 1. Update `LCD_CONFIG` in `config.py`
 2. Modify display methods in each module
 
-See [MODULES_GUIDE.md](MODULES_GUIDE.md) for module customization.
+See [ARCHITECTURE_GUIDE.md](ARCHITECTURE_GUIDE.md) for module customization.
 
 ### What hardware do I need?
 
-- Raspberry Pi (any model with GPIO)
-- 16x2 LCD with I2C interface (PCF8574)
-- Jumper wires
+**Required:**
+- Raspberry Pi (any model with GPIO - tested on Pi 4)
+- 16x2 LCD with I2C interface (PCF8574 or compatible)
+- 4 jumper wires (female-to-female recommended)
+- Power supply for Raspberry Pi (2.5A+ recommended)
+
+**Required Software:**
+- I2C enabled on Raspberry Pi (via raspi-config)
+- `i2c-tools` and `python3-smbus` libraries
+- `RPLCD` Python library
+
+> 📖 **For complete hardware setup with wiring diagrams:**  
+> See the [Hardware Setup](../README.md#-hardware-setup) section in README.md
 - Internet connection
 
 No additional sensors or components needed!
@@ -301,7 +319,7 @@ sudo systemctl disable crypto_ticker.service
 4. **Check Python path and virtual environment**
 5. **Ensure permissions are correct**
 
-See [SYSTEMD_SERVICE.md](SYSTEMD_SERVICE.md) for complete troubleshooting.
+See [SYSTEMD_SETUP.md](SYSTEMD_SETUP.md) for complete troubleshooting.
 
 ### Can I run it without systemd?
 
@@ -311,7 +329,7 @@ cd /path_to_folder/rasp-crypto-ticker
 python main.py
 ```
 
-Or use cron for autostart (see [SYSTEMD_SERVICE.md](SYSTEMD_SERVICE.md) for alternatives).
+Or use cron for autostart (see [SYSTEMD_SETUP.md](SYSTEMD_SETUP.md) for alternatives).
 
 ---
 
@@ -321,7 +339,7 @@ Or use cron for autostart (see [SYSTEMD_SERVICE.md](SYSTEMD_SERVICE.md) for alte
 
 Yes! The modular architecture makes it easy to add custom modules.
 
-See [MODULES_GUIDE.md](MODULES_GUIDE.md) for complete guide with:
+See [ARCHITECTURE_GUIDE.md](ARCHITECTURE_GUIDE.md) for complete guide with:
 - Step-by-step tutorial
 - Module template
 - Examples (stocks, news, sports, etc.)
@@ -332,7 +350,7 @@ See [MODULES_GUIDE.md](MODULES_GUIDE.md) for complete guide with:
 2. Test changes: `python main.py`
 3. Restart service: `sudo systemctl restart crypto_ticker.service`
 
-See [MODULES_GUIDE.md](MODULES_GUIDE.md) for module architecture details.
+See [ARCHITECTURE_GUIDE.md](ARCHITECTURE_GUIDE.md) for module architecture details.
 
 ### Can I change the display format?
 
@@ -490,7 +508,7 @@ Yes! Create copies of the project directory with different `config.py` files. Us
 
 ### Can I log data to a file/database?
 
-Not built-in, but you can modify the modules to add logging. See [MODULES_GUIDE.md](MODULES_GUIDE.md) for customization.
+Not built-in, but you can modify the modules to add logging. See [ARCHITECTURE_GUIDE.md](ARCHITECTURE_GUIDE.md) for customization.
 
 ### Can I control it via web interface?
 
@@ -498,7 +516,7 @@ Not built-in. You could create a web interface that modifies `config.py` and res
 
 ### Can I use it without a physical LCD (for testing)?
 
-Yes! Create a mock LCD class for testing. Example in [MODULES_GUIDE.md](MODULES_GUIDE.md).
+Yes! Create a mock LCD class for testing. Example in [ARCHITECTURE_GUIDE.md](ARCHITECTURE_GUIDE.md).
 
 ### How do I update to the latest version?
 
@@ -515,8 +533,8 @@ sudo systemctl restart crypto_ticker.service
 ### Where can I find more documentation?
 
 - **Configuration:** [CONFIGURATION_GUIDE.md](CONFIGURATION_GUIDE.md)
-- **Modules:** [MODULES_GUIDE.md](MODULES_GUIDE.md)
-- **Service Setup:** [SYSTEMD_SERVICE.md](SYSTEMD_SERVICE.md)
+- **Architecture & Modules:** [ARCHITECTURE_GUIDE.md](ARCHITECTURE_GUIDE.md)
+- **Service Setup:** [SYSTEMD_SETUP.md](SYSTEMD_SETUP.md)
 - **Quick Start:** [README.md](../README.md)
 
 ### I found a bug. What should I do?
@@ -598,32 +616,15 @@ MODULE_ORDER = ['weather', 'crypto']
 
 ---
 
-## 🔄 Migration & Updates
+## 🔗 Related Documentation
 
-### I have the old monolithic version. How do I upgrade?
-
-The modular version (v2.0.0) is a complete rewrite. To migrate:
-
-1. Backup your old `config.json` settings
-2. Pull the new code
-3. Update `config.py` with your settings
-4. Update systemd service file to use `main.py`
-5. Restart service
-
-### Do I need to reinstall dependencies?
-
-Only if they've changed. Safe to run:
-```bash
-pip install -r requirements.txt
-```
-
-### Will my old config work?
-
-The v2.0 uses `config.py` instead of `config.json`. You'll need to transfer settings manually. See [CONFIGURATION_GUIDE.md](CONFIGURATION_GUIDE.md).
+- **I2C Setup**: See [I2C_SETUP.md](I2C_SETUP.md)
+- **Architecture & Modules**: See [ARCHITECTURE_GUIDE.md](ARCHITECTURE_GUIDE.md)
+- **Configuration Guide**: See [CONFIGURATION_GUIDE.md](CONFIGURATION_GUIDE.md)
+- **Systemd Service**: See [SYSTEMD_SETUP.md](SYSTEMD_SETUP.md)
+- **Quick Start**: See [README.md](../README.md)
 
 ---
 
-**Need more help?** Check the detailed guides in the `docs/` folder!
-
-**Back to main README:** [README.md](../README.md)
+**Back to main README**: [README.md](../README.md)
 

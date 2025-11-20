@@ -21,7 +21,7 @@ All application settings are managed in **`config.py`** - a single, centralized 
 ## 📂 Configuration File Location
 
 ```
-/home/jackdaniels/Documents/projects/rasp-crypto-ticker/config.py
+/path_to_folder/rasp-crypto-ticker/config.py
 ```
 
 Edit this file to customize all application behavior.
@@ -701,14 +701,16 @@ Before running, verify:
 - [ ] Module order is as desired
 - [ ] Display durations are reasonable
 - [ ] Update intervals respect API limits
-- [ ] All enabled modules are in MODULE_ORDER
+- [ ] All enabled modules are in `MODULE_ORDER`
 
 ---
 
 ## 🔗 Related Documentation
 
-- **Module Development**: See [MODULES_GUIDE.md](MODULES_GUIDE.md)
-- **Systemd Service**: See [SYSTEMD_SERVICE.md](SYSTEMD_SERVICE.md)
+- **I2C Setup**: See [I2C_SETUP.md](I2C_SETUP.md)
+- **Architecture & Modules**: See [ARCHITECTURE_GUIDE.md](ARCHITECTURE_GUIDE.md)
+- **Systemd Service**: See [SYSTEMD_SETUP.md](SYSTEMD_SETUP.md)
+- **Frequently Asked Questions**: See [FAQ.md](FAQ.md)
 - **Quick Start**: See [README.md](../README.md)
 
 ---

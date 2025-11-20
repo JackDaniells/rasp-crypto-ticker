@@ -1,6 +1,275 @@
-# Module Development Guide
+# Project Architecture & Module Development Guide
 
-Complete guide for understanding and creating modules for the Raspberry Pi Crypto Ticker.
+Complete guide covering project structure, architecture patterns, and module development for the Raspberry Pi Crypto Ticker.
+
+---
+
+## 📋 Table of Contents
+
+1. [Project Structure](#-project-structure)
+2. [Architecture Overview](#-architecture-overview)
+3. [Module System](#-module-system)
+4. [Existing Modules](#-existing-modules)
+5. [Creating Custom Modules](#️-creating-custom-modules)
+6. [Module Template](#-module-template)
+7. [Best Practices](#-best-practices)
+8. [Debugging](#-debugging)
+
+---
+
+## 📁 Project Structure
+
+```
+rasp-crypto-ticker/
+│
+├── 🚀 main.py                   ← Entry point
+│   ├── Uses config.py for settings
+│   ├── Imports modules from modules/ directory
+│   ├── init_lcd()
+│   ├── establish_connection()
+│   ├── initialize_modules()
+│   ├── display_module_status()
+│   └── main()
+│
+├── ⚙️  config.py                 ← Configuration file
+├── 📜 launcher.sh                ← Startup script (for systemd)
+├── 📋 requirements.txt           ← Python dependencies
+│
+├── 📦 modules/                   ← Module directory
+│   ├── __init__.py
+│   │
+│   ├── 🏗️  base_module.py        ← BASE CLASS
+│   │   └── BaseModule (Abstract)
+│   │       ├── fetch_data()      [abstract]
+│   │       ├── display()         [abstract]
+│   │       ├── should_update_data()
+│   │       ├── update_data()
+│   │       ├── is_enabled()
+│   │       └── get_display_count()
+│   │
+│   ├── 🌡️  weather_time.py       ← WEATHER & TIME MODULE
+│   │   └── WeatherModule(BaseModule)
+│   │       ├── fetch_data()      → WeatherAPI
+│   │       ├── display()         → 3 screens
+│   │       ├── _print_clock()
+│   │       └── _lcd_write_string_centered()
+│   │
+│   └── 💰 crypto_module.py       ← CRYPTO MODULE
+│       └── CryptoModule(BaseModule)
+│           ├── fetch_data()      → CoinGecko API
+│           ├── display()         → N screens (1 per coin)
+│           └── _display_crypto()
+│
+└── 📚 docs/                      ← Documentation
+    ├── ARCHITECTURE_GUIDE.md     ← This file
+    ├── I2C_SETUP.md              ← I2C setup guide
+    ├── CONFIGURATION_GUIDE.md    ← Complete configuration guide
+    ├── SYSTEMD_SETUP.md          ← Systemd service setup
+    └── FAQ.md                    ← Frequently asked questions
+```
+
+### File and Directory Purpose
+
+| Path | Type | Purpose | Lines |
+|------|------|---------|-------|
+| `main.py` | File | Application entry point, initializes LCD, modules, and main loop | ~150 |
+| `config.py` | File | Centralized configuration for all modules and app settings | ~200 |
+| `launcher.sh` | File | Shell script for launching the application (used by systemd) | ~20 |
+| `requirements.txt` | File | Python package dependencies | ~5 |
+| `modules/` | Directory | Contains all display modules | - |
+| `modules/base_module.py` | File | Abstract base class for all modules | ~60 |
+| `modules/weather_time.py` | File | Weather and time display module | ~107 |
+| `modules/crypto_module.py` | File | Cryptocurrency price display module | ~108 |
+| `docs/` | Directory | All project documentation | - |
+
+---
+
+## 🏗️ Architecture Overview
+
+### How Components Work Together
+
+**1. Application Startup (`main.py`)**
+
+```
+main()
+  │
+  ├─→ init_lcd()                    # Initialize LCD display
+  │     └─→ CharLCD(i2c_expander)
+  │
+  ├─→ establish_connection()        # Get device IP
+  │     └─→ socket.connect()
+  │
+  ├─→ initialize_modules()          # Create module instances
+  │     ├─→ WeatherModule(lcd, config)
+  │     └─→ CryptoModule(lcd, config)
+  │
+  ├─→ display_module_status()       # Show enabled modules
+  │
+  └─→ Main Loop                     # Display cycle
+        └─→ for each module in MODULE_ORDER:
+              ├─→ module.update_data()    # Fetch if needed
+              └─→ module.display()        # Show on LCD
+```
+
+**2. Module Lifecycle**
+
+```
+Module Creation
+  │
+  ├─→ __init__(lcd, config)
+  │     ├─→ Store LCD reference
+  │     ├─→ Store config settings
+  │     └─→ Initialize last_update = 0
+  │
+  ├─→ should_update_data()
+  │     └─→ Check if (now - last_update) > update_interval
+  │
+  ├─→ update_data()
+  │     ├─→ if should_update_data():
+  │     │     ├─→ fetch_data()        # API call
+  │     │     ├─→ Store data
+  │     │     └─→ Update last_update
+  │     │
+  │     └─→ else: skip (use cached data)
+  │
+  └─→ display()
+        └─→ Show data on LCD (1+ screens)
+```
+
+**3. Configuration Flow**
+
+```
+config.py
+  │
+  ├─→ LCD_CONFIG
+  │     └─→ Used by: main.py (init_lcd)
+  │
+  ├─→ WEATHER_MODULE_CONFIG
+  │     └─→ Used by: WeatherModule.__init__()
+  │
+  ├─→ CRYPTO_MODULE_CONFIG
+  │     └─→ Used by: CryptoModule.__init__()
+  │
+  ├─→ APP_CONFIG
+  │     └─→ Used by: main.py (main loop)
+  │
+  └─→ MODULE_ORDER
+        └─→ Used by: main.py (display sequence)
+```
+
+### Architecture Benefits
+
+**1. Modularity**
+- Each module is self-contained
+- Easy to add/remove modules
+- No module dependencies
+
+**2. Extensibility**
+- Create custom modules by inheriting `BaseModule`
+- No changes needed to `main.py`
+- Just add to `MODULE_ORDER`
+
+**3. Maintainability**
+- Single responsibility per file
+- Clear separation of concerns
+- Easy to debug and test
+
+**4. Configuration**
+- Single source of truth (`config.py`)
+- No hardcoded values
+- Easy to customize
+
+### Key Design Patterns
+
+**1. Template Method Pattern**  
+`BaseModule` defines the skeleton (`update_data()`), subclasses implement specific steps (`fetch_data()`).
+
+**2. Strategy Pattern**  
+Different modules implement different display strategies, all following the same interface.
+
+**3. Single Responsibility Principle**  
+Each module handles one concern (weather, crypto, etc.).
+
+**4. Open/Closed Principle**  
+Open for extension (new modules), closed for modification (no changes to base class).
+
+### File Dependencies
+
+```
+main.py
+  ├─→ imports: config.py (all configs)
+  ├─→ imports: modules.weather_time (WeatherModule)
+  ├─→ imports: modules.crypto_module (CryptoModule)
+  └─→ imports: RPLCD, socket, time
+
+modules/weather_time.py
+  ├─→ imports: modules.base_module (BaseModule)
+  ├─→ imports: requests, datetime, time
+  └─→ uses: WEATHER_MODULE_CONFIG from config.py
+
+modules/crypto_module.py
+  ├─→ imports: modules.base_module (BaseModule)
+  ├─→ imports: requests, datetime, time
+  └─→ uses: CRYPTO_MODULE_CONFIG from config.py
+
+modules/base_module.py
+  ├─→ imports: time
+  └─→ uses: No external dependencies
+
+config.py
+  └─→ imports: os (for environment variables)
+```
+
+---
+
+## 🔄 Module System
+
+### Module Inheritance Hierarchy
+
+```
+        BaseModule (Abstract)
+                │
+                │ Provides common interface:
+                │ - fetch_data() [abstract]
+                │ - display() [abstract]
+                │ - should_update_data()
+                │ - update_data()
+                │ - is_enabled()
+                │ - get_display_count()
+                │
+        ┌───────┴───────┐
+        │               │
+WeatherModule     CryptoModule
+        │               │
+    3 screens       N screens
+   (per cycle)     (1 per coin)
+```
+
+### BaseModule (Abstract Base Class)
+
+**File**: `modules/base_module.py`
+
+**Purpose**: Defines the common interface for all display modules
+
+**Abstract Methods** (must be implemented):
+- `fetch_data()` - Fetch data from APIs/sources
+- `display()` - Show data on LCD
+
+**Concrete Methods** (provided by base class):
+- `should_update_data()` - Checks if data needs updating based on interval
+- `update_data()` - Fetches and stores new data
+- `is_enabled()` - Returns if module is enabled
+- `get_display_count()` - Returns number of screens (default 1)
+
+**Properties**:
+- `self.name` - Module name
+- `self.lcd` - LCD object reference
+- `self.config` - Configuration dictionary
+- `self.enabled` - Enabled status
+- `self.display_duration` - Seconds per screen
+- `self.update_interval` - Seconds between updates
+- `self.data` - Cached data
+- `self.last_update` - Timestamp of last update
 
 ---
 
@@ -8,7 +277,7 @@ Complete guide for understanding and creating modules for the Raspberry Pi Crypt
 
 ### Weather & Time Module
 
-**File**: `modules/weather_time.py` (107 lines)
+**File**: `modules/weather_time.py`
 
 **Features:**
 - 3 display screens: Temperature, Feels Like, Weather Condition
@@ -39,14 +308,14 @@ WEATHER_MODULE_CONFIG = {
 }
 ```
 
-**API:** WeatherAPI (requires API key)  
-**Update Frequency:** Every 10 minutes (configurable)
+**API**: WeatherAPI (requires API key)  
+**Update Frequency**: Every 10 minutes (configurable)
 
 ---
 
 ### Crypto Module
 
-**File**: `modules/crypto_module.py` (99 lines)
+**File**: `modules/crypto_module.py`
 
 **Features:**
 - Multi-coin support (configurable)
@@ -84,68 +353,24 @@ CRYPTO_MODULE_CONFIG = {
 }
 ```
 
-**API:** CoinGecko (no API key needed)  
-**Update Frequency:** Every 10 minutes (configurable)
+**API**: CoinGecko (no API key needed)  
+**Update Frequency**: Every 10 minutes (configurable)
 
 ---
 
-### Base Module
+## 🛠️ Creating Custom Modules
 
-**File**: `modules/base_module.py` (57 lines)
+### Step-by-Step Guide
 
-The abstract base class that all modules inherit from.
-
-**Key Features:**
-- Abstract methods: `fetch_data()` and `display()`
-- Automatic update interval management
-- Enable/disable functionality
-- Display duration control
-
-**Methods:**
-- `should_update_data()` - Checks if data needs refreshing
-- `update_data()` - Fetches and updates module data
-- `is_enabled()` - Returns module enabled status
-- `get_display_count()` - Returns number of screens
-
-**Properties:**
-- `self.name` - Module name
-- `self.lcd` - LCD object
-- `self.config` - Configuration dictionary
-- `self.enabled` - Enabled status
-- `self.display_duration` - Seconds per screen
-- `self.update_interval` - Seconds between updates
-- `self.data` - Cached data
-- `self.last_update` - Timestamp of last update
-
----
-
-## 🔄 Module Inheritance Hierarchy
-
-```
-        BaseModule (Abstract)
-                │
-        ┌───────┴───────┐
-        │               │
-WeatherModule     CryptoModule
-        │               │
-    3 screens       N screens
-```
-
-All custom modules should inherit from `BaseModule`.
-
----
-
-## 🛠️ Creating a Custom Module
-
-### Step 1: Create Module File
+#### Step 1: Create Module File
 
 Create a new file in the `modules/` directory:
 
 ```bash
-nano modules/stock_module.py
+nano modules/example.py
 ```
 
-### Step 2: Import Base Module
+#### Step 2: Import Base Module
 
 ```python
 """Stock module for displaying stock prices"""
@@ -167,7 +392,7 @@ class StockModule(BaseModule):
         self.lcd_max_size = config.get('lcd_max_size', 16)
 ```
 
-### Step 3: Implement Required Methods
+#### Step 3: Implement Required Methods
 
 **1. fetch_data() - Get data from API or source:**
 
@@ -257,7 +482,7 @@ def should_update_data(self):
     return super().should_update_data()
 ```
 
-### Step 4: Add Configuration
+#### Step 4: Add Configuration
 
 Edit `config.py`:
 
@@ -277,7 +502,7 @@ STOCK_MODULE_CONFIG = {
 MODULE_ORDER = ['weather', 'crypto', 'stock']
 ```
 
-### Step 5: Register Module
+#### Step 5: Register Module
 
 Edit `main.py` to register your module:
 
@@ -311,7 +536,7 @@ from config import (
 )
 ```
 
-### Step 6: Test Your Module
+#### Step 6: Test Your Module
 
 ```bash
 # Test manually first
@@ -536,7 +761,7 @@ class CustomUpdateModule(BaseModule):
 
 ---
 
-## 🐛 Debugging Modules
+## 🐛 Debugging
 
 ### Check Module Loading
 ```python
@@ -589,21 +814,19 @@ Before deploying your module, ensure:
 - [ ] Configuration added to `config.py`
 - [ ] Registered in `main.py`
 - [ ] Added to `MODULE_ORDER`
-- [ ] Tested manually
 - [ ] LCD output fits in 16x2
 - [ ] Respects API rate limits
 - [ ] Logs useful debug info
-- [ ] Documentation written
 
 ---
 
-## 🔗 Related Files
+## 🔗 Related Documentation
 
-- `modules/base_module.py` - Base class implementation
-- `modules/weather_time.py` - Example module with API and time display
-- `modules/crypto_module.py` - Example module with multiple displays
-- `config.py` - Configuration file
-- `main.py` - Module registration
+- [I2C_SETUP.md](I2C_SETUP.md) - Complete I2C setup and troubleshooting
+- [CONFIGURATION_GUIDE.md](CONFIGURATION_GUIDE.md) - Detailed configuration options
+- [SYSTEMD_SETUP.md](SYSTEMD_SETUP.md) - Service setup and management
+- [FAQ.md](FAQ.md) - Frequently asked questions
+- [README.md](../README.md) - Project overview and quick start
 
 ---
 
@@ -612,8 +835,13 @@ Before deploying your module, ensure:
 - Python `requests` library: https://requests.readthedocs.io/
 - RPLCD documentation: https://rplcd.readthedocs.io/
 - Python `datetime` module: https://docs.python.org/3/library/datetime.html
+- Design Patterns: https://refactoring.guru/design-patterns
 
 ---
 
-**Back to main README**: See [README.md](../README.md) for project overview and setup.
+**Last Updated**: November 20, 2025
+
+---
+
+**Back to main README**: [README.md](../README.md)
 
