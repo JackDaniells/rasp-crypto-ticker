@@ -162,7 +162,7 @@ The weather module automatically detects your location using your IP address. No
 
 ### Can I set a specific location for weather?
 
-Currently, weather uses auto-detection via IP. To add custom location support, you'd need to modify `modules/weather_time.py`.
+Currently, weather uses auto-detection via IP. To add custom location support, you'd need to modify `modules/weather.py`.
 
 See [ARCHITECTURE_GUIDE.md](ARCHITECTURE_GUIDE.md) for module customization.
 

@@ -185,36 +185,40 @@ sudo systemctl status crypto_ticker.service
 ```
 
 📖 **For complete setup instructions, service management, and troubleshooting:**  
-See **[SYSTEMD_SERVICE.md](docs/SYSTEMD_SERVICE.md)** for detailed documentation.
+See **[SYSTEMD_SETUP.md](docs/SYSTEMD_SETUP.md)** for detailed documentation.
 
 
 ---
 
-## 📁 Project Structure
+## 📁 Project Structure & Architecture
 
-The project follows a **modular architecture** where each display type (weather, crypto, etc.) is an independent, self-contained module. This design makes it easy to add new modules, disable unwanted ones, or customize existing displays without affecting the rest of the system.
+The project follows a **clean, modular architecture** with clear separation between API communication and display logic. This design emphasizes simplicity, maintainability, and extensibility.
 
-**Core Components:**
+### Core Components
 
 ```
 rasp-crypto-ticker/
 ├── main.py           ← Entry point (initializes LCD and runs display loop)
 ├── config.py         ← Centralized configuration (all settings in one file)
-├── modules/          ← Display modules (independent, interchangeable)
+│
+├── clients/          ← API Client Layer (HTTP communication)
+│   ├── __init__.py        → Exports all client functions
+│   ├── weather_api.py     → WeatherAPI endpoint (returns data or None)
+│   ├── crypto_api.py      → CoinGecko API endpoint (returns data or None)
+│   └── ip_api.py          → IP address endpoint (returns IP or None)
+│
+├── modules/          ← Display Layer (data presentation)
+│   ├── __init__.py        → Exports all modules
 │   ├── base.py            → Abstract base class (defines module interface)
-│   ├── weather_time.py    → Weather & time display module
+│   ├── weather.py         → Weather & time display module
 │   └── crypto.py          → Cryptocurrency price display module
+│
 └── docs/             ← Documentation (setup guides and references)
 ```
 
-**How It Works:**
-- **`main.py`** initializes the LCD, loads enabled modules from `config.py`, and cycles through each module's display
-- **`config.py`** controls everything: which modules are enabled, API keys, update intervals, display order, etc.
-- **`modules/`** contains self-contained display modules that inherit from `BaseModule`
-- Each module fetches its own data and handles its own display logic independently
 
 📖 **For complete architecture and module development guide:**  
-See **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** for project structure, design patterns, and creating custom modules 
+See **[ARCHITECTURE_GUIDE.md](docs/ARCHITECTURE_GUIDE.md)** for design patterns, implementation details, and creating custom modules
 
 ---
 
@@ -291,7 +295,7 @@ Two ready-to-use modules are included:
 
 **Weather Module:** Each metric displays on a separate screen with time at the top.
 
-> 📖 **Module details:** See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for complete module documentation
+> 📖 **Module details:** See [ARCHITECTURE_GUIDE.md](docs/ARCHITECTURE_GUIDE.md) for complete module documentation
 
 ### Creating Custom Modules
 
@@ -304,7 +308,7 @@ Want to add your own module (stocks, news, sports, etc.)? The modular architectu
 4. Add configuration to `config.py`
 5. Enable in `MODULE_ORDER`
 
-📖 **Complete guide:** See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed instructions, templates, examples, and best practices.
+📖 **Complete guide:** See [ARCHITECTURE_GUIDE.md](docs/ARCHITECTURE_GUIDE.md) for detailed instructions, templates, examples, and best practices.
 
 ---
 
@@ -349,10 +353,10 @@ Have questions? Check the comprehensive FAQ for answers!
 ## 📚 Additional Resources
 
 - **Project Documentation**:
-  - [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Project structure, architecture, and module development
+  - [ARCHITECTURE_GUIDE.md](docs/ARCHITECTURE_GUIDE.md) - Project structure, architecture, and module development
   - [I2C_SETUP.md](docs/I2C_SETUP.md) - Complete I2C setup and troubleshooting guide
   - [CONFIGURATION_GUIDE.md](docs/CONFIGURATION_GUIDE.md) - Complete configuration guide
-  - [SYSTEMD_SERVICE.md](docs/SYSTEMD_SERVICE.md) - Systemd service setup and management
+  - [SYSTEMD_SETUP.md](docs/SYSTEMD_SETUP.md) - Systemd service setup and management
   - [FAQ.md](docs/FAQ.md) - Frequently asked questions (50+ Q&A)
 - **External Resources**:
   - WeatherAPI: https://www.weatherapi.com/

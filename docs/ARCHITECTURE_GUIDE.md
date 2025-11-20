@@ -47,7 +47,7 @@ rasp-crypto-ticker/
 │   │       ├── is_enabled()
 │   │       └── get_display_count()
 │   │
-│   ├── 🌡️  weather_time.py       ← WEATHER & TIME MODULE
+│   ├── 🌡️  weather.py            ← WEATHER & TIME MODULE
 │   │   └── WeatherModule(BaseModule)
 │   │       ├── fetch_data()      → WeatherAPI
 │   │       ├── display()         → 3 screens
@@ -78,13 +78,70 @@ rasp-crypto-ticker/
 | `requirements.txt` | File | Python package dependencies | ~5 |
 | `modules/` | Directory | Contains all display modules | - |
 | `modules/base.py` | File | Abstract base class for all modules | ~60 |
-| `modules/weather_time.py` | File | Weather and time display module | ~107 |
+| `modules/weather.py` | File | Weather and time display module | ~86 |
 | `modules/crypto.py` | File | Cryptocurrency price display module | ~108 |
 | `docs/` | Directory | All project documentation | - |
 
 ---
 
 ## 🏗️ Architecture Overview
+
+### Core Design Principles
+
+This project follows a **clean, pragmatic architecture** focused on simplicity and reliability:
+
+#### 1. **Separation of Concerns**
+
+**Two-Layer Architecture:**
+```
+clients/     → API Communication Layer (HTTP requests only)
+modules/     → Display Layer (presentation logic only)
+```
+
+**Benefits:**
+- Easy to test (mock clients for unit tests)
+- Easy to debug (network issues vs. display issues)
+- Easy to extend (new APIs don't affect display code)
+
+#### 2. **Fail-Safe by Design**
+
+**Never Crash Principle:**
+```python
+# Clients return None on any error
+data = get_weather(...)  # Returns dict or None
+
+# Modules use safe access with defaults
+temp = data.get('current', {}).get('temp_c', '--')  # Never crashes
+```
+
+**Graceful Degradation:**
+- Missing data → Show `--` placeholder
+- API failure → Keep last good data (configurable retries)
+- Network down → Display continues with cached data
+
+#### 3. **Simple Contracts**
+
+**Client Functions:**
+- Input: API parameters (keys, endpoints, timeout)
+- Output: Data dict or `None` (no exceptions, no error objects)
+- Responsibility: HTTP communication only
+
+**Module Functions:**
+- Input: Configuration from `config.py`
+- Output: None (side effect: updates LCD)
+- Responsibility: Display logic only
+
+#### 4. **Configuration Over Code**
+
+All behavior controlled through `config.py`:
+- Which modules are enabled
+- Update intervals and display durations
+- API keys and endpoints
+- Error handling parameters (`max_failed_attempts`)
+
+**Result**: Change behavior without editing code.
+
+---
 
 ### How Components Work Together
 
@@ -197,20 +254,39 @@ Open for extension (new modules), closed for modification (no changes to base cl
 
 ```
 main.py
-  ├─→ imports: config.py (all configs)
-  ├─→ imports: modules.weather_time (WeatherModule)
+  ├─→ imports: config (LCD_CONFIG, MODULE_CONFIGS, APP_CONFIG, MODULE_ORDER)
+  ├─→ imports: modules.weather (WeatherModule)
   ├─→ imports: modules.crypto (CryptoModule)
-  └─→ imports: RPLCD, socket, time
+  ├─→ imports: clients.get_ip_address (for connection setup)
+  └─→ imports: RPLCD, time
 
-modules/weather_time.py
+clients/weather_api.py
+  ├─→ imports: requests
+  └─→ exports: get_weather() → returns dict or None
+
+clients/crypto_api.py
+  ├─→ imports: requests
+  └─→ exports: get_crypto_prices() → returns dict or None
+
+clients/ip_api.py
+  ├─→ imports: requests
+  └─→ exports: get_ip_address() → returns str or None
+
+modules/weather.py
   ├─→ imports: modules.base (BaseModule)
-  ├─→ imports: requests, datetime, time
+  ├─→ imports: clients.get_weather (API call)
+  ├─→ imports: datetime, time (for display)
   └─→ uses: WEATHER_MODULE_CONFIG from config.py
 
 modules/crypto.py
   ├─→ imports: modules.base (BaseModule)
-  ├─→ imports: requests, datetime, time
+  ├─→ imports: clients.get_crypto_prices (API call)
+  ├─→ imports: datetime, time (for display)
   └─→ uses: CRYPTO_MODULE_CONFIG from config.py
+
+modules/base.py
+  ├─→ imports: datetime (for update timing)
+  └─→ exports: BaseModule (abstract class)
 
 modules/base.py
   ├─→ imports: time
@@ -277,7 +353,7 @@ WeatherModule     CryptoModule
 
 ### Weather & Time Module
 
-**File**: `modules/weather_time.py`
+**File**: `modules/weather.py`
 
 **Features:**
 - 3 display screens: Temperature, Feels Like, Weather Condition
