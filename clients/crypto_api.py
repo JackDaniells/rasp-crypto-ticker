@@ -8,12 +8,12 @@ from utils.cache import create_cache, cached_api_call, DEFAULT_CACHE_DURATION
 _cache = create_cache()
 
 
-def get_crypto_prices(coingecko_ids, fiat_currency='usd', timeout=10, cache_duration=DEFAULT_CACHE_DURATION, force_refresh=False):
+def get_crypto_prices(crypto_ids, fiat_currency='usd', timeout=10, cache_duration=DEFAULT_CACHE_DURATION, force_refresh=False):
     """
     Fetch cryptocurrency prices from CoinGecko API with caching
     
     Args:
-        coingecko_ids: Comma-separated string or list of CoinGecko IDs
+        crypto_ids: Comma-separated string or list of cryptocurrency IDs
         fiat_currency: Fiat currency code (e.g., 'usd', 'eur')
         timeout: Request timeout in seconds
         cache_duration: Cache duration in seconds (default: 600 = 10 minutes)
@@ -23,16 +23,16 @@ def get_crypto_prices(coingecko_ids, fiat_currency='usd', timeout=10, cache_dura
         Crypto price data dict if successful, None if failed
     """
     # Convert list to comma-separated string if needed
-    if isinstance(coingecko_ids, list):
-        coingecko_ids = ','.join(coingecko_ids)
+    if isinstance(crypto_ids, list):
+        crypto_ids = ','.join(crypto_ids)
     
-    cache_key = f"{coingecko_ids}_{fiat_currency}"
+    cache_key = f"{crypto_ids}_{fiat_currency}"
     
     # Define fetch function
     def fetch():
         url = "https://api.coingecko.com/api/v3/simple/price"
         params = {
-            'ids': coingecko_ids,
+            'ids': crypto_ids,
             'vs_currencies': fiat_currency,
             'include_24hr_change': 'true',
             'precision': '2'

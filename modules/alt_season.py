@@ -17,7 +17,7 @@ import time
 from datetime import datetime
 from modules.base import BaseModule
 from clients import get_altcoin_season_index
-from utils.lcd_wrapper import POS_CENTER, ROW_FIRST, ROW_SECOND
+from utils.lcd import POS_CENTER, ROW_FIRST, ROW_SECOND
 
 
 class AltSeasonModule(BaseModule):

@@ -4,14 +4,14 @@ import time
 from datetime import datetime
 from .base import BaseModule
 from clients import get_weather
-from utils.lcd_wrapper import POS_CENTER, ROW_FIRST, ROW_SECOND
+from utils.lcd import POS_CENTER, ROW_FIRST, ROW_SECOND
 
 
-class WeatherModule(BaseModule):
+class WeatherTimeModule(BaseModule):
     """Module for displaying weather and time information"""
     
     def __init__(self, lcd, config):
-        super().__init__('Weather', lcd, config)
+        super().__init__('WeatherTime', lcd, config)
         
         # Validate required configuration
         required_keys = ['api_key', 'ip', 'timeout', 'lcd_max_size']

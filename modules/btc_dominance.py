@@ -11,10 +11,10 @@ Lower dominance (<40%) often indicates Altcoin Season
 import time
 from .base import BaseModule
 from clients import get_global_data
-from utils.lcd_wrapper import POS_CENTER, ROW_FIRST, ROW_SECOND
+from utils.lcd import POS_CENTER, ROW_FIRST, ROW_SECOND
 
 
-class BtcDominanceModule(BaseModule):
+class BTCDominanceModule(BaseModule):
     """Module for displaying Bitcoin Dominance"""
     
     def __init__(self, lcd, config):
@@ -29,21 +29,14 @@ class BtcDominanceModule(BaseModule):
             return None
         
         # Extract BTC dominance from global data
-        if 'market_cap_percentage' not in data:
-            print("BTC Dominance: market_cap_percentage not in response")
-            return None
+        btc_dominance = data.get('market_cap_percentage', {}).get('btc', '--')
         
-        btc_dominance = data['market_cap_percentage'].get('btc')
-        
-        if btc_dominance is None:
-            print("BTC Dominance: Bitcoin data not found")
-            return None
-        
-        print(f"BTC Dominance: {btc_dominance:.2f}%")
+        # Round if numeric, otherwise keep default
+        if isinstance(btc_dominance, (int, float)):
+            btc_dominance = round(btc_dominance, 2)
         
         return {
-            'dominance': round(btc_dominance, 2),
-            'timestamp': data.get('timestamp', int(time.time()))
+            'dominance': btc_dominance,
         }
     
     def _get_status(self, dominance):
@@ -72,18 +65,12 @@ class BtcDominanceModule(BaseModule):
             return
         
         # Get dominance value
-        dominance = self.data.get('dominance')
+        dominance = self.data.get('dominance', '--')
         
-        if dominance is not None:
-            try:
-                dominance_str = f"{int(round(dominance))}%"
-                status = self._get_status(dominance)
-            except (ValueError, TypeError):
-                dominance_str = '--'
-                status = '--'
-        else:
-            dominance_str = '--'
-            status = '--'
+        # Format dominance and status based on type
+        dominance_str = f"{int(round(dominance))}%"
+        status = self._get_status(dominance)
+     
         
         # Clear display
         self.lcd.clear()

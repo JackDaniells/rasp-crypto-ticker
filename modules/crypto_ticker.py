@@ -1,37 +1,36 @@
-"""Crypto module for displaying cryptocurrency prices"""
+"""Cryptocurrency Ticker module for displaying cryptocurrency prices"""
 
 import time
 from datetime import datetime
 from .base import BaseModule
 from clients import get_crypto_prices
-from utils.lcd_wrapper import ROW_FIRST, ROW_SECOND, POS_RIGHT
+from utils.lcd import ROW_FIRST, ROW_SECOND, POS_RIGHT
 
 
-class CryptoModule(BaseModule):
+class CryptoTickerModule(BaseModule):
     """Module for displaying cryptocurrency prices"""
     
     def __init__(self, lcd, config):
-        super().__init__('Crypto', lcd, config)
+        super().__init__('CryptoTicker', lcd, config)
         
         # Validate required configuration
-        required_keys = ['symbols', 'fiat', 'timeout', 'lcd_max_size']
+        required_keys = ['symbols', 'fiat', 'timeout']
         missing_keys = [key for key in required_keys if key not in config]
         if missing_keys:
-            raise ValueError(f"Crypto module missing required config keys: {', '.join(missing_keys)}. Check config.py")
+            raise ValueError(f"CryptoTicker module missing required config keys: {', '.join(missing_keys)}. Check config.py")
         
         self.symbols = config['symbols']
         self.fiat = config['fiat']
         self.timeout = config['timeout']
-        self.lcd_max_size = config['lcd_max_size']
     
     def fetch_data(self):
-        """Fetch cryptocurrency prices from CoinGecko API"""
-        # Get CoinGecko IDs from the dict values
-        coingecko_ids = ','.join(self.symbols.values())
+        """Fetch cryptocurrency prices from API"""
+        # Get crypto IDs from the dict values
+        crypto_ids = ','.join(self.symbols.values())
         
         # Client returns None on failure
         data = get_crypto_prices(
-            coingecko_ids=coingecko_ids,
+            crypto_ids=crypto_ids,
             fiat_currency=self.fiat,
             timeout=self.timeout,
             cache_duration=self.update_interval
@@ -45,10 +44,10 @@ class CryptoModule(BaseModule):
             return
         
         # Display each crypto for configured duration
-        # Iterate through acronyms and CoinGecko IDs
-        for acronym, coingecko_id in self.symbols.items():
-            if coingecko_id in self.data:
-                self._display_crypto(acronym, self.data[coingecko_id])
+        # Iterate through acronyms and crypto IDs
+        for acronym, crypto_id in self.symbols.items():
+            if crypto_id in self.data:
+                self._display_crypto(acronym, self.data[crypto_id])
                 time.sleep(self.display_duration)
     
     def _display_crypto(self, acronym, data):

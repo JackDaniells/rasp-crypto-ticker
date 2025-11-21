@@ -10,7 +10,7 @@ from datetime import datetime
 from modules.base import BaseModule
 from clients import get_global_data
 from utils.parser import format_large_number
-from utils.lcd_wrapper import ROW_FIRST, ROW_SECOND, POS_RIGHT
+from utils.lcd import ROW_FIRST, ROW_SECOND, POS_RIGHT
 
 
 class MarketCapModule(BaseModule):

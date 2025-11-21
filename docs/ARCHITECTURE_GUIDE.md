@@ -47,15 +47,15 @@ rasp-crypto-ticker/
 │   │       ├── is_enabled()
 │   │       └── get_display_count()
 │   │
-│   ├── 🌡️  weather.py            ← WEATHER & TIME MODULE
-│   │   └── WeatherModule(BaseModule)
+│   ├── 🌡️  weather_time.py        ← WEATHER & TIME MODULE
+│   │   └── WeatherTimeModule(BaseModule)
 │   │       ├── fetch_data()      → WeatherAPI
 │   │       ├── display()         → 3 screens
 │   │       ├── _print_clock()
 │   │       └── _lcd_write_string_centered()
 │   │
-│   ├── 💰 crypto.py               ← CRYPTO MODULE
-│   │   └── CryptoModule(BaseModule)
+│   ├── 💰 crypto_ticker.py        ← CRYPTOCURRENCY TICKER MODULE
+│   │   └── CryptoTickerModule(BaseModule)
 │   │       ├── fetch_data()      → CoinGecko API
 │   │       ├── display()         → N screens (1 per coin)
 │   │       └── _display_crypto()
@@ -66,7 +66,7 @@ rasp-crypto-ticker/
 │   │       └── display()         → 1 screen (index + classification)
 │   │
 │   ├── ₿ btc_dominance.py         ← BTC DOMINANCE MODULE
-│   │   └── BtcDominanceModule(BaseModule)
+│   │   └── BTCDominanceModule(BaseModule)
 │   │       ├── fetch_data()      → CoinGecko Global API
 │   │       ├── display()         → 1 screen (dominance % + status)
 │   │       └── _get_status()     → Determines classification from dominance
@@ -107,7 +107,7 @@ rasp-crypto-ticker/
 │   │   ├── update_cache()        → Updates cache with new data
 │   │   └── get_cache_age()       → Returns cache age in seconds
 │   │
-│   └── 📺 lcd_wrapper.py          ← LCD DISPLAY WRAPPER
+│   └── 📺 lcd.py                  ← LCD DISPLAY WRAPPER
 │       ├── SafeLCD class         → Automatic text validation & positioning
 │       ├── ROW_FIRST, ROW_SECOND → Row constants (0, 1)
 │       └── POS_LEFT, POS_CENTER, POS_RIGHT → Alignment constants
@@ -130,8 +130,8 @@ rasp-crypto-ticker/
 | `requirements.txt` | File | Python package dependencies |
 | `modules/` | Directory | Contains all display modules |
 | `modules/base.py` | File | Abstract base class for all modules |
-| `modules/weather.py` | File | Weather and time display module |
-| `modules/crypto.py` | File | Cryptocurrency price display module |
+| `modules/weather_time.py` | File | Weather and time display module |
+| `modules/crypto_ticker.py` | File | Cryptocurrency price ticker module |
 | `modules/fear_greed.py` | File | Fear & Greed Index display module |
 | `modules/btc_dominance.py` | File | Bitcoin Dominance module (BTC % of total market cap) |
 | `modules/alt_season.py` | File | Altcoin Season module (7d + 30d, 2 screens) |
@@ -147,7 +147,7 @@ rasp-crypto-ticker/
 | `utils/__init__.py` | File | Package initialization |
 | `utils/parser.py` | File | Data parsing and formatting utilities (format_large_number) |
 | `utils/cache.py` | File | Centralized caching utilities (DEFAULT_CACHE_DURATION, create_cache(), cached_api_call()) |
-| `utils/lcd_wrapper.py` | File | LCD display wrapper (SafeLCD class, row/position constants) |
+| `utils/lcd.py` | File | LCD display wrapper (SafeLCD class, row/position constants) |
 | `docs/` | Directory | All project documentation |
 
 ---
@@ -227,8 +227,8 @@ main()
   │     └─→ socket.connect()
   │
   ├─→ initialize_modules()          # Create module instances
-  │     ├─→ WeatherModule(lcd, config)
-  │     ├─→ CryptoModule(lcd, config)
+  │     ├─→ WeatherTimeModule(lcd, config)
+  │     ├─→ CryptoTickerModule(lcd, config)
   │     ├─→ FearGreedModule(lcd, config)
   │     ├─→ AltcoinSeasonModule(lcd, config)
   │     └─→ MarketCapModule(lcd, config)
@@ -269,13 +269,13 @@ Note: API clients handle caching internally using utils/cache.py
 
 ---
 
-### LCD Display Wrapper (`utils/lcd_wrapper.py`)
+### LCD Display Wrapper (`utils/lcd.py`)
 
 **Purpose**: Centralized LCD display logic with automatic text validation and positioning
 
 **SafeLCD Class:**
 ```python
-from utils.lcd_wrapper import SafeLCD, ROW_FIRST, ROW_SECOND, POS_LEFT, POS_CENTER, POS_RIGHT
+from utils.lcd import SafeLCD, ROW_FIRST, ROW_SECOND, POS_LEFT, POS_CENTER, POS_RIGHT
 
 # Wraps the raw CharLCD instance
 lcd = SafeLCD(raw_lcd, max_size=16)
@@ -327,10 +327,10 @@ config.py
   │     └─→ Used by: main.py (init_lcd)
   │
   ├─→ WEATHER_MODULE_CONFIG
-  │     └─→ Used by: WeatherModule.__init__()
+  │     └─→ Used by: WeatherTimeModule.__init__()
   │
   ├─→ CRYPTO_MODULE_CONFIG
-  │     └─→ Used by: CryptoModule.__init__()
+  │     └─→ Used by: CryptoTickerModule.__init__()
   │
   ├─→ APP_CONFIG
   │     └─→ Used by: main.py (main loop)
@@ -454,8 +454,8 @@ Open for extension (new modules), closed for modification (no changes to base cl
 ```
 main.py
   ├─→ imports: config (LCD_CONFIG, MODULE_CONFIGS, APP_CONFIG, MODULE_ORDER)
-  ├─→ imports: modules.weather (WeatherModule)
-  ├─→ imports: modules.crypto (CryptoModule)
+  ├─→ imports: modules.weather_time (WeatherTimeModule)
+  ├─→ imports: modules.crypto_ticker (CryptoTickerModule)
   ├─→ imports: clients.get_ip_address (for connection setup)
   └─→ imports: RPLCD, time
 
@@ -477,13 +477,13 @@ clients/ip_api.py
   ├─→ imports: requests
   └─→ exports: get_ip_address() → returns str or None (no caching)
 
-modules/weather.py
+modules/weather_time.py
   ├─→ imports: modules.base (BaseModule)
   ├─→ imports: clients.get_weather (API call)
   ├─→ imports: datetime, time (for display)
   └─→ uses: WEATHER_MODULE_CONFIG from config.py
 
-modules/crypto.py
+modules/crypto_ticker.py
   ├─→ imports: modules.base (BaseModule)
   ├─→ imports: clients.get_crypto_prices (API call)
   ├─→ imports: datetime, time (for display)
@@ -520,7 +520,7 @@ config.py
                 │
         ┌───────┴───────┐
         │               │
-WeatherModule     CryptoModule
+WeatherTimeModule     CryptoTickerModule
         │               │
     3 screens       N screens
    (per cycle)     (1 per coin)
@@ -558,7 +558,7 @@ WeatherModule     CryptoModule
 
 ### Weather & Time Module
 
-**File**: `modules/weather.py`
+**File**: `modules/weather_time.py`
 
 **Features:**
 - 4 display screens: Location, Temperature, Feels Like, Weather Condition
@@ -599,7 +599,7 @@ WEATHER_MODULE_CONFIG = {
 
 ### Crypto Module
 
-**File**: `modules/crypto.py`
+**File**: `modules/crypto_ticker.py`
 
 **Features:**
 - Multi-coin support (configurable)

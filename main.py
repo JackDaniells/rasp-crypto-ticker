@@ -2,7 +2,7 @@
 
 import time
 from RPLCD.i2c import CharLCD
-from utils.lcd_wrapper import SafeLCD, POS_CENTER, ROW_FIRST, ROW_SECOND
+from utils.lcd import SafeLCD, POS_CENTER, ROW_FIRST, ROW_SECOND
 
 from config import (
     LCD_CONFIG,
@@ -15,12 +15,12 @@ from config import (
     APP_CONFIG,
     MODULE_ORDER
 )
-from modules.weather import WeatherModule
-from modules.crypto import CryptoModule
+from modules.weather_time import WeatherTimeModule
+from modules.crypto_ticker import CryptoTickerModule
 from modules.fear_greed import FearGreedModule
 from modules.market_cap import MarketCapModule
 from modules.alt_season import AltSeasonModule
-from modules.btc_dominance import BtcDominanceModule
+from modules.btc_dominance import BTCDominanceModule
 from clients import get_ip_address
 
 
@@ -87,12 +87,12 @@ def initialize_modules(lcd, ip):
     if WEATHER_MODULE_CONFIG['enabled']:
         weather_config = WEATHER_MODULE_CONFIG.copy()
         weather_config['ip'] = ip
-        modules['weather'] = WeatherModule(lcd, weather_config)
+        modules['weather'] = WeatherTimeModule(lcd, weather_config)
         print("Weather & Time module initialized")
     
     # Initialize Crypto Module
     if CRYPTO_MODULE_CONFIG['enabled']:
-        modules['crypto'] = CryptoModule(lcd, CRYPTO_MODULE_CONFIG)
+        modules['crypto'] = CryptoTickerModule(lcd, CRYPTO_MODULE_CONFIG)
         print("Crypto module initialized")
     
     # Initialize Fear & Greed Index Module
@@ -107,7 +107,7 @@ def initialize_modules(lcd, ip):
     
     # Initialize Bitcoin Dominance Module
     if BTC_DOMINANCE_MODULE_CONFIG['enabled']:
-        modules['btc_dominance'] = BtcDominanceModule(lcd, BTC_DOMINANCE_MODULE_CONFIG)
+        modules['btc_dominance'] = BTCDominanceModule(lcd, BTC_DOMINANCE_MODULE_CONFIG)
         print("BTC Dominance module initialized")
     
     # Initialize Altcoin Season Module

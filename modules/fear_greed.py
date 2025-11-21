@@ -9,7 +9,7 @@ import time
 from datetime import datetime
 from modules.base import BaseModule
 from clients import get_fear_greed_index
-from utils.lcd_wrapper import POS_CENTER, ROW_FIRST, ROW_SECOND
+from utils.lcd import POS_CENTER, ROW_FIRST, ROW_SECOND
 
 
 class FearGreedModule(BaseModule):
@@ -58,7 +58,7 @@ class FearGreedModule(BaseModule):
         self.lcd.clear()
         
         # Align center "Fear&Greed Idx." on first line
-        title = "Fear&Greed Idx"
+        title = "Fear & Greed Idx"
         self.lcd.write_string(row=ROW_FIRST, text=title, pos=POS_CENTER)
         
         # Line 2: Value and classification
@@ -66,4 +66,3 @@ class FearGreedModule(BaseModule):
         self.lcd.write_string(row=ROW_SECOND, text=display_text, pos=POS_CENTER)
         
         time.sleep(self.display_duration)
-

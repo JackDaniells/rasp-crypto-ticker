@@ -217,8 +217,8 @@ rasp-crypto-ticker/
 ├── modules/          ← Display Layer (data presentation)
 │   ├── __init__.py           → Exports all modules
 │   ├── base.py               → Abstract base class (defines module interface)
-│   ├── weather.py            → Weather & time display module
-│   ├── crypto.py             → Cryptocurrency price display module
+│   ├── weather_time.py       → Weather & time display module
+│   ├── crypto_ticker.py      → Cryptocurrency price ticker module
 │   ├── fear_greed.py         → Fear & Greed Index display module
 │   ├── alt_season.py         → Altcoin Season module
 │   └── market_cap.py         → Total market cap display module
