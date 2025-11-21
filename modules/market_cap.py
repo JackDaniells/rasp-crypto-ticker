@@ -73,7 +73,7 @@ class MarketCapModule(BaseModule):
         
         # Line 2: Market cap label (left) and value (right)
         self.lcd.cursor_pos = (1, 0)
-        self.lcd.write_string("MCap:")
+        self.lcd.write_string("Mkt. Cap:")
         
         # Right-align market cap value
         value_text = f"${market_cap_str}"

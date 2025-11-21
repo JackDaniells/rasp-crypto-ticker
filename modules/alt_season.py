@@ -72,7 +72,7 @@ class AltSeasonModule(BaseModule):
         
         # Screen 1: 7-day Altcoin Season Index
         if index_7d is not None:
-            self._display_screen(index_7d, '7d')
+            self._display_screen(index_7d, '07d')
         
         # Screen 2: 30-day Altcoin Season Index
         if index_30d is not None:

@@ -22,6 +22,7 @@ class WeatherModule(BaseModule):
         self.ip = config['ip']
         self.timeout = config['timeout']
         self.lcd_max_size = config['lcd_max_size']
+        self.temperature_unit = config.get('temperature_unit', 'celsius').lower()
     
     def fetch_data(self):
         """Fetch weather data from weatherapi"""
@@ -52,32 +53,48 @@ class WeatherModule(BaseModule):
         if not self.is_data_ready():
             return
         
-        # Use dummy values if data fields are missing
-        temp_c = self.data.get('current', {}).get('temp_c', '--')
-        feelslike_c = self.data.get('current', {}).get('feelslike_c', '--')
+        unit = self.temperature_unit.upper()
+        temp = self.data.get('current', {}).get(f'temp_{unit.lower()}', '--')
+        feelslike = self.data.get('current', {}).get(f'feelslike_{unit.lower()}', '--')
+        
+        # Get other weather data
         condition = self.data.get('current', {}).get('condition', {}).get('text', '--')
+        location_name = self.data.get('location', {}).get('name', '--')
+        location_country = self.data.get('location', {}).get('country', '')
         
-        # Screen 1: Temperature
+        # Screen 1: Location
         self.lcd.clear()
         self._print_clock()
-        text = f"Temp: {temp_c}c"
+        # Format location (add country if it fits)
+        if location_country and len(f"{location_name}, {location_country}") <= self.lcd_max_size:
+            location_text = f"{location_name}, {location_country}"
+        else:
+            location_text = location_name
+        self._lcd_write_string_centered(1, location_text)
+        time.sleep(self.display_duration)
+
+        # Screen 2: Temperature
+        self.lcd.clear()
+        self._print_clock()
+        text = f"Temp: {temp}{unit}"
         self._lcd_write_string_centered(1, text)
         time.sleep(self.display_duration)
         
-        # Screen 2: Feels like
+        # Screen 3: Feels like
         self.lcd.clear()
         self._print_clock()
-        text = f"Sens: {feelslike_c}c"
+        text = f"Sens: {feelslike}{unit}"
         self._lcd_write_string_centered(1, text)
         time.sleep(self.display_duration)
         
-        # Screen 3: Condition
+        # Screen 4: Condition
         self.lcd.clear()
         self._print_clock()
         self._lcd_write_string_centered(1, condition)
         time.sleep(self.display_duration)
+        
     
     def get_display_count(self):
         """Return number of screens this module displays"""
-        return 3
+        return 4
 

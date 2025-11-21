@@ -157,7 +157,8 @@ WEATHER_MODULE_CONFIG = {
     'update_interval': 600,
     'display_duration': 10,
     'timeout': 10,
-    'lcd_max_size': LCD_CONFIG['max_size']
+    'lcd_max_size': LCD_CONFIG['max_size'],
+    'temperature_unit': 'C'  # Options: 'C' (Celsius) or 'F' (Fahrenheit)
 }
 ```
 
@@ -171,13 +172,15 @@ WEATHER_MODULE_CONFIG = {
 | `display_duration` | int | `10` | Seconds to display each screen |
 | `timeout` | int | `10` | API request timeout (seconds) |
 | `lcd_max_size` | int | `16` | LCD character width |
+| `temperature_unit` | str | `'C'` | Temperature display unit: `'C'` (Celsius) or `'F'` (Fahrenheit) |
 
 **Display Screens:**
-1. Temperature (°C)
-2. Feels Like temperature (°C)
-3. Weather condition
+1. Location (City, Country)
+2. Temperature (°C or °F, based on config)
+3. Feels Like temperature (°C or °F, based on config)
+4. Weather condition
 
-**Total Display Time:** 3 screens × 10 seconds = **30 seconds**
+**Total Display Time:** 4 screens × 10 seconds = **40 seconds**
 
 **API Key Setup:**
 
@@ -198,8 +201,9 @@ source ~/.bashrc
 
 **Features:**
 - Auto-detects location via IP address
-- Shows temperature in Celsius
-- Displays "feels like" temperature
+- Shows location (city and country)
+- Configurable temperature unit (Celsius or Fahrenheit)
+- Shows actual and "feels like" temperature
 - Shows weather condition (Sunny, Cloudy, etc.)
 - Updates every 10 minutes (configurable)
 
@@ -469,7 +473,7 @@ BTC_DOMINANCE_MODULE_CONFIG = {
 **Display Format:**
 ```
  BTC Dominance
-56.58% - V.High
+56% - Very High
 ```
 
 **Status Classifications:**
@@ -536,7 +540,7 @@ MARKET_CAP_MODULE_CONFIG = {
 **Display Format:**
 ```
 HH:MM       +2.5%
-MCap:       $1.2T
+Mkt. Cap:       $1.2T
 ```
 
 **What it shows:**
@@ -693,7 +697,7 @@ CRYPTO_MODULE_CONFIG['symbols'] = {
 MODULE_ORDER = ['weather', 'crypto']
 ```
 
-**Result:** Weather (30s) + BTC (10s) = 40-second cycle
+**Result:** Weather (40s) + BTC (10s) = 50-second cycle
 
 ---
 
@@ -787,10 +791,10 @@ Formula: `Sum of (Module Screens × Display Duration)`
 
 **Example (Default Config):**
 ```
-Weather: 3 screens × 10s = 30s
+Weather: 4 screens × 10s = 40s
 Crypto:  3 coins   × 10s = 30s
 ─────────────────────────────
-Total:   6 screens        = 60s
+Total:   7 screens        = 70s
 ```
 
 ### Update vs Display

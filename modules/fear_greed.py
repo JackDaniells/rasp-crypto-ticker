@@ -57,7 +57,7 @@ class FearGreedModule(BaseModule):
         self.lcd.clear()
         
         # Align center "Fear&Greed Idx." on first line
-        title = "Fear & Greed"
+        title = "Fear&Greed Idx"
         title_pos = (16 - len(title)) // 2
         self.lcd.cursor_pos = (0, title_pos)
         self.lcd.write_string(title)

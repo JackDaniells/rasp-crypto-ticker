@@ -498,21 +498,23 @@ WeatherModule     CryptoModule
 **File**: `modules/weather.py`
 
 **Features:**
-- 3 display screens: Temperature, Feels Like, Weather Condition
+- 4 display screens: Location, Temperature, Feels Like, Weather Condition
 - Auto-fetches weather based on IP location
+- Configurable temperature unit (Celsius or Fahrenheit)
 - Shows current time on each screen
 - Centered text display
 
 **Methods:**
 - `fetch_data()` - Fetches weather from WeatherAPI
-- `display()` - Shows 3 screens (temp, sensation, condition)
+- `display()` - Shows 4 screens (location, temp, sensation, condition)
 - `_print_clock()` - Displays date/time on row 0
 - `_lcd_write_string_centered()` - Centers text on LCD
 
 **Display Screens:**
-1. Temperature (°C) with time on top
-2. Feels Like temperature (°C) with time on top
-3. Weather condition (e.g., "Sunny", "Cloudy") with time on top
+1. Location (City, Country) with time on top
+2. Temperature (°C or °F) with time on top
+3. Feels Like temperature (°C or °F) with time on top
+4. Weather condition (e.g., "Sunny", "Cloudy") with time on top
 
 **Configuration:**
 ```python
@@ -522,7 +524,8 @@ WEATHER_MODULE_CONFIG = {
     'update_interval': 600,  # 10 minutes
     'display_duration': 10,  # seconds per screen
     'timeout': 10,
-    'lcd_max_size': 16
+    'lcd_max_size': 16,
+    'temperature_unit': 'C'  # Options: 'C' or 'F'
 }
 ```
 

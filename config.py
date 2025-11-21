@@ -29,7 +29,8 @@ WEATHER_MODULE_CONFIG = {
     'display_duration': 5,
     'timeout': 10,
     'lcd_max_size': LCD_CONFIG['max_size'],
-    'max_failed_attempts': 3
+    'max_failed_attempts': 3,
+    'temperature_unit': 'C'  # Options: 'C' (Celsius) or 'F' (Fahrenheit)
 }
 
 # ============================================================================
@@ -114,7 +115,7 @@ APP_CONFIG = {
 # ============================================================================
 # MODULE DISPLAY ORDER
 # ============================================================================
-MODULE_ORDER = ['weather', 'fear_greed', 'btc_dominance', 'alt_season', 'market_cap'] + ['crypto'] * 3
+MODULE_ORDER = ['weather', 'btc_dominance', 'alt_season', 'fear_greed', 'market_cap'] + ['crypto'] * 3
 
 # ============================================================================
 # QUICK REFERENCE

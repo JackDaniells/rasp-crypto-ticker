@@ -9,7 +9,7 @@ A modular information display system for Raspberry Pi that transforms a 16x2 LCD
 This project turns your Raspberry Pi into an always-on information display that shows:
 
 - **📊 Live Cryptocurrency Prices**: Track Bitcoin, Ethereum, Solana, or any cryptocurrency from CoinGecko API, displaying current price and 24-hour change percentage.
-- **🌡️ Real-Time Weather**: Automatically detects your location via IP and displays current temperature, feels-like temperature, and weather conditions using WeatherAPI.
+- **🌡️ Real-Time Weather**: Automatically detects your location via IP and displays location name, current temperature (configurable Celsius/Fahrenheit), feels-like temperature, and weather conditions using WeatherAPI.
 - **😨 Fear & Greed Index**: Market sentiment indicator showing current index value and classification (Extreme Fear to Extreme Greed).
 - **₿ Bitcoin Dominance**: Shows Bitcoin's market dominance percentage (% of total crypto market cap), with status classification (V.High/High/Moderate/Low/V.Low).
 - **🔄 Altcoin Season Index**: Shows what percentage of top 100 coins outperformed Bitcoin in the last 7 days and 30 days (displays two separate screens), determining if it's Altcoin Season (≥75%), Bitcoin Season (≤25%), or Mixed (25-75%).
@@ -282,9 +282,10 @@ See **[CONFIGURATION_GUIDE.md](docs/CONFIGURATION_GUIDE.md)**
 Six ready-to-use modules are included:
 
 **🌡️ Weather & Time Module**
-- Displays: Temperature, Feels Like, Weather Condition
+- Displays: Location, Temperature, Feels Like, Weather Condition
 - Shows current time on each screen
 - Auto-detects location via IP
+- Configurable temperature unit (°C or °F)
 - Updates every 10 minutes (configurable)
 
 **💰 Crypto Module**
