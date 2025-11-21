@@ -73,7 +73,7 @@ def establish_connection(lcd):
     lcd.clear()
     lcd_write_string_centered(lcd, 0, "Connected!", LCD_CONFIG['max_size'])
     lcd_write_string_centered(lcd, 1, f"IP:{ip}", LCD_CONFIG['max_size'])
-    time.sleep(5)
+    time.sleep(2)
     return ip
 
 

@@ -33,6 +33,17 @@ class FearGreedModule(BaseModule):
         """Fetch Fear and Greed Index data"""
         return get_fear_greed_index(timeout=self.timeout)
     
+    def _shorten_classification(self, classification):
+        """Shorten two-word classifications (e.g., 'Extreme Fear' -> 'Extr. Fear')"""
+        if classification == '--':
+            return classification
+        
+        words = classification.split()
+        if len(words) == 2 and len(words[0]) > 4:
+            words[0] = words[0][:4] + '.'
+        
+        return ' '.join(words)
+    
     def display(self):
         """Display Fear and Greed Index on LCD"""
         if not self.is_data_ready():
@@ -40,7 +51,7 @@ class FearGreedModule(BaseModule):
         
         # Get index value and classification
         index_value = self.data.get('value', '--')
-        classification = self.data.get('value_classification', '--')
+        classification = self._shorten_classification(self.data.get('value_classification', '--'))
         
         # Display Fear & Greed Index
         self.lcd.clear()
@@ -54,7 +65,7 @@ class FearGreedModule(BaseModule):
         
         # Line 2: Value and classification
         self.lcd.cursor_pos = (1, 0)
-        display_text = f"{index_value}: {classification}"
+        display_text = f"{index_value} - {classification}"
         
         # Center the text
         text_pos = max(0, (16 - len(display_text)) // 2)
