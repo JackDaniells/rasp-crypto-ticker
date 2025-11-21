@@ -80,7 +80,7 @@ MODULE_ORDER = ['crypto', 'fear_greed', 'altcoin_season', 'market_cap']
 
 **Repeat Modules:**
 ```python
-MODULE_ORDER = ['crypto', 'crypto', 'fear_greed', 'weather']
+MODULE_ORDER = ['crypto'] * 2 + ['fear_greed', 'weather']
 ```
 
 ### Adjust Display Timing

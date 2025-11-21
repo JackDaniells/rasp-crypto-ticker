@@ -26,10 +26,10 @@ WEATHER_MODULE_CONFIG = {
     'enabled': True,
     'api_key': os.getenv('WEATHER_API_KEY'),
     'update_interval': 600,
-    'display_duration': 10,
+    'display_duration': 5,
     'timeout': 10,
     'lcd_max_size': LCD_CONFIG['max_size'],
-    'max_failed_attempts': 3  # Show error after 3 consecutive API failures
+    'max_failed_attempts': 3
 }
 
 # ============================================================================
@@ -47,7 +47,7 @@ CRYPTO_MODULE_CONFIG = {
     'display_duration': 10,
     'timeout': 10,
     'lcd_max_size': LCD_CONFIG['max_size'],
-    'max_failed_attempts': 3  # Show error after 3 consecutive API failures
+    'max_failed_attempts': 3
 }
 
 # ============================================================================
@@ -56,9 +56,9 @@ CRYPTO_MODULE_CONFIG = {
 FEAR_GREED_MODULE_CONFIG = {
     'enabled': True,
     'update_interval': 3600,  # 1 hour (index updates every 8 hours)
-    'display_duration': 10,   # seconds
+    'display_duration': 5,   # seconds
     'timeout': 10,
-    'max_failed_attempts': 3  # Show error after 3 consecutive API failures
+    'max_failed_attempts': 3
 }
 
 # ============================================================================
@@ -68,9 +68,9 @@ MARKET_CAP_MODULE_CONFIG = {
     'enabled': True,
     'fiat': 'usd',
     'update_interval': 600,   # 10 minutes
-    'display_duration': 10,   # seconds
+    'display_duration': 5,   # seconds
     'timeout': 10,
-    'max_failed_attempts': 3  # Show error after 3 consecutive API failures
+    'max_failed_attempts': 3
 }
 
 # ============================================================================
@@ -85,7 +85,7 @@ APP_CONFIG = {
 # ============================================================================
 # MODULE DISPLAY ORDER
 # ============================================================================
-MODULE_ORDER = ['weather', 'fear_greed', 'market_cap', 'crypto']
+MODULE_ORDER = ['weather', 'fear_greed', 'market_cap'] + ['crypto'] * 3
 
 # ============================================================================
 # QUICK REFERENCE
