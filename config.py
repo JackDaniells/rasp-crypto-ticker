@@ -51,6 +51,29 @@ CRYPTO_MODULE_CONFIG = {
 }
 
 # ============================================================================
+# FEAR & GREED INDEX MODULE CONFIGURATION
+# ============================================================================
+FEAR_GREED_MODULE_CONFIG = {
+    'enabled': True,
+    'update_interval': 3600,  # 1 hour (index updates every 8 hours)
+    'display_duration': 10,   # seconds
+    'timeout': 10,
+    'max_failed_attempts': 3  # Show error after 3 consecutive API failures
+}
+
+# ============================================================================
+# MARKET CAP MODULE CONFIGURATION
+# ============================================================================
+MARKET_CAP_MODULE_CONFIG = {
+    'enabled': True,
+    'fiat': 'usd',
+    'update_interval': 600,   # 10 minutes
+    'display_duration': 10,   # seconds
+    'timeout': 10,
+    'max_failed_attempts': 3  # Show error after 3 consecutive API failures
+}
+
+# ============================================================================
 # APPLICATION CONFIGURATION
 # ============================================================================
 APP_CONFIG = {
@@ -62,7 +85,7 @@ APP_CONFIG = {
 # ============================================================================
 # MODULE DISPLAY ORDER
 # ============================================================================
-MODULE_ORDER = ['weather', 'crypto']
+MODULE_ORDER = ['weather', 'fear_greed', 'market_cap', 'crypto']
 
 # ============================================================================
 # QUICK REFERENCE

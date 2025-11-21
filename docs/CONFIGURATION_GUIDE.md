@@ -70,12 +70,17 @@ CRYPTO_MODULE_CONFIG = {
 
 **Show Crypto First:**
 ```python
-MODULE_ORDER = ['crypto', 'weather']
+MODULE_ORDER = ['crypto', 'weather', 'fear_greed', 'altcoin_season', 'market_cap']
 ```
 
-**Crypto Only, Multiple Times:**
+**Crypto and Market Indicators Only:**
 ```python
-MODULE_ORDER = ['crypto', 'crypto', 'crypto']
+MODULE_ORDER = ['crypto', 'fear_greed', 'altcoin_season', 'market_cap']
+```
+
+**Repeat Modules:**
+```python
+MODULE_ORDER = ['crypto', 'crypto', 'fear_greed', 'weather']
 ```
 
 ### Adjust Display Timing
@@ -84,12 +89,18 @@ MODULE_ORDER = ['crypto', 'crypto', 'crypto']
 ```python
 WEATHER_MODULE_CONFIG['display_duration'] = 5
 CRYPTO_MODULE_CONFIG['display_duration'] = 5
+FEAR_GREED_MODULE_CONFIG['display_duration'] = 5
+ALTCOIN_SEASON_MODULE_CONFIG['display_duration'] = 5
+MARKET_CAP_MODULE_CONFIG['display_duration'] = 5
 ```
 
 **Slower Updates (30 minutes):**
 ```python
 WEATHER_MODULE_CONFIG['update_interval'] = 1800
 CRYPTO_MODULE_CONFIG['update_interval'] = 1800
+FEAR_GREED_MODULE_CONFIG['update_interval'] = 1800
+ALTCOIN_SEASON_MODULE_CONFIG['update_interval'] = 1800
+MARKET_CAP_MODULE_CONFIG['update_interval'] = 1800
 ```
 
 ---
@@ -320,7 +331,102 @@ Row 1: BTC:     $95432  (acronym + price)
 
 ---
 
-### 5. Application Configuration
+### 4. Fear & Greed Index Module Configuration
+
+```python
+FEAR_GREED_MODULE_CONFIG = {
+    'enabled': True,
+    'update_interval': 3600,  # 1 hour
+    'display_duration': 10,   # seconds
+    'timeout': 10,
+    'max_failed_attempts': 3
+}
+```
+
+**Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `enabled` | bool | `True` | Enable/disable Fear & Greed module |
+| `update_interval` | int | `3600` | Seconds between API updates (1 hour) |
+| `display_duration` | int | `10` | Seconds to display on screen |
+| `timeout` | int | `10` | API request timeout (seconds) |
+| `max_failed_attempts` | int | `3` | API failures before showing error |
+
+**Display Format:**
+```
+HH:MM    F&G Index
+  45: Fear
+```
+
+**Index Values:**
+- 0-24: Extreme Fear 😨
+- 25-44: Fear 😟
+- 45-55: Neutral 😐
+- 56-75: Greed 😊
+- 76-100: Extreme Greed 🤑
+
+**API Details:**
+- **Source**: Alternative.me
+- **Endpoint**: https://api.alternative.me/fng/
+- **No API key required**
+- **Update frequency**: Every 8 hours (index updates)
+- **Rate limit**: Public endpoint (reasonable use)
+
+---
+
+### 5. Market Cap Module Configuration
+
+```python
+MARKET_CAP_MODULE_CONFIG = {
+    'enabled': True,
+    'fiat': 'usd',
+    'update_interval': 600,   # 10 minutes
+    'display_duration': 10,   # seconds
+    'timeout': 10,
+    'max_failed_attempts': 3
+}
+```
+
+**Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `enabled` | bool | `True` | Enable/disable Market Cap module |
+| `fiat` | str | `'usd'` | Currency (usd, eur, gbp, etc.) |
+| `update_interval` | int | `600` | Seconds between API updates (10 min) |
+| `display_duration` | int | `10` | Seconds to display on screen |
+| `timeout` | int | `10` | API request timeout (seconds) |
+| `max_failed_attempts` | int | `3` | API failures before showing error |
+
+**Display Format:**
+```
+HH:MM       +2.5%
+MCap:       $1.2T
+```
+
+**What it shows:**
+- **Top line**: Current time and 24h change percentage
+- **Bottom line**: Total crypto market capitalization
+  - **T** = Trillions (e.g., $1.2T = $1,200,000,000,000)
+  - **B** = Billions (e.g., $450B = $450,000,000,000)
+  - **M** = Millions (rarely seen for total market cap)
+
+**API Details:**
+- **Source**: CoinGecko (same as crypto prices)
+- **Endpoint**: https://api.coingecko.com/api/v3/global
+- **No API key required**
+- **Updates**: Real-time (as frequently as configured)
+- **Rate limit**: 10-50 calls/minute (shared with crypto module)
+
+**Use Cases:**
+- **Bull market indicator**: Rising market cap = growing market
+- **Market health**: Compare with individual coin performance
+- **Risk assessment**: Sudden drops indicate market-wide correction
+
+---
+
+### 6. Application Configuration
 
 ```python
 APP_CONFIG = {
@@ -345,32 +451,39 @@ APP_CONFIG = {
 
 ---
 
-### 6. Module Display Order
+### 7. Module Display Order
 
 ```python
-MODULE_ORDER = ['weather', 'crypto']
+MODULE_ORDER = ['weather', 'crypto', 'fear_greed', 'altcoin_season', 'market_cap']
 ```
 
 **Description:**
 Determines the sequence in which modules are displayed in the main loop.
 
+**Available Modules:**
+- `'weather'` - Weather & Time module
+- `'crypto'` - Cryptocurrency prices
+- `'fear_greed'` - Fear & Greed Index
+- `'altcoin_season'` - Altcoin Season Index
+- `'market_cap'` - Total crypto market cap
+
 **Examples:**
 
 ```python
-# Default order
-MODULE_ORDER = ['weather', 'clock', 'crypto']
+# All modules (default)
+MODULE_ORDER = ['weather', 'crypto', 'fear_greed', 'altcoin_season', 'market_cap']
 
-# Crypto first
-MODULE_ORDER = ['crypto', 'weather']
+# Crypto-focused display
+MODULE_ORDER = ['crypto', 'fear_greed', 'market_cap', 'altcoin_season']
 
-# Only crypto
-MODULE_ORDER = ['crypto']
+# Traditional ticker (no market indicators)
+MODULE_ORDER = ['weather', 'crypto']
 
-# Crypto between other modules
-MODULE_ORDER = ['weather', 'crypto', 'clock', 'crypto']
+# Market sentiment only
+MODULE_ORDER = ['fear_greed', 'altcoin_season', 'market_cap']
 
-# Custom sequence
-MODULE_ORDER = ['crypto', 'crypto', 'weather']
+# Repeated modules
+MODULE_ORDER = ['crypto', 'crypto', 'fear_greed', 'weather']
 ```
 
 **Notes:**

@@ -202,16 +202,22 @@ rasp-crypto-ticker/
 ├── config.py         ← Centralized configuration (all settings in one file)
 │
 ├── clients/          ← API Client Layer (HTTP communication)
-│   ├── __init__.py        → Exports all client functions
-│   ├── weather_api.py     → WeatherAPI endpoint (returns data or None)
-│   ├── crypto_api.py      → CoinGecko API endpoint (returns data or None)
-│   └── ip_api.py          → IP address endpoint (returns IP or None)
+│   ├── __init__.py             → Exports all client functions
+│   ├── weather_api.py          → WeatherAPI endpoint (returns data or None)
+│   ├── crypto_api.py           → CoinGecko API endpoint (returns data or None)
+│   ├── fear_greed_api.py       → Fear & Greed Index endpoint
+│   ├── altcoin_season_api.py   → Altcoin Season Index endpoint
+│   ├── market_cap_api.py       → Global market cap endpoint
+│   └── ip_api.py               → IP address endpoint (returns IP or None)
 │
 ├── modules/          ← Display Layer (data presentation)
-│   ├── __init__.py        → Exports all modules
-│   ├── base.py            → Abstract base class (defines module interface)
-│   ├── weather.py         → Weather & time display module
-│   └── crypto.py          → Cryptocurrency price display module
+│   ├── __init__.py           → Exports all modules
+│   ├── base.py               → Abstract base class (defines module interface)
+│   ├── weather.py            → Weather & time display module
+│   ├── crypto.py             → Cryptocurrency price display module
+│   ├── fear_greed.py         → Fear & Greed Index display module
+│   ├── altcoin_season.py     → Altcoin Season Index display module
+│   └── market_cap.py         → Total market cap display module
 │
 └── docs/             ← Documentation (setup guides and references)
 ```
@@ -269,7 +275,7 @@ See **[CONFIGURATION_GUIDE.md](docs/CONFIGURATION_GUIDE.md)**
 
 ### Built-in Modules
 
-Two ready-to-use modules are included:
+Four ready-to-use modules are included:
 
 **🌡️ Weather & Time Module**
 - Displays: Temperature, Feels Like, Weather Condition
@@ -283,19 +289,51 @@ Two ready-to-use modules are included:
 - Updates every 10 minutes (configurable)
 - Uses short acronyms (BTC, ETH, SOL) for 16-char display
 
-### Display Format Example
+**😨 Fear & Greed Index Module**
+- Displays: Market sentiment index (0-100)
+- Classification: Extreme Fear, Fear, Neutral, Greed, Extreme Greed
+- Updates every 1 hour (configurable)
+- No API key required (Alternative.me public API)
+
+**💎 Market Cap Module**
+- Displays: Total cryptocurrency market capitalization
+- Shows 24h change percentage
+- Updates every 10 minutes (configurable)
+- No API key required (CoinGecko public API)
+
+### Display Format Examples
+
+**Weather & Time Module (16x2 LCD):**
+```
+┌────────────────┐
+│2025/01/01 14:30│ ← Current date + time
+│   Temp: 25°C   │ ← Temperature (also displays feels like & weather condition)
+└────────────────┘
+```
 
 **Crypto Module (16x2 LCD):**
 ```
 ┌────────────────┐
 │14:30      +5.2%│ ← Current time + 24h Change
-│BTC:     $95432 │ ← Symbol + Price
+│BTC:      $95432│ ← Symbol + Price
 └────────────────┘
 ```
 
-**Weather Module:** Each metric displays on a separate screen with time at the top.
+**Fear & Greed Index Module:**
+```
+┌────────────────┐
+│14:30  F&G Index│ ← Current time + Title
+│   68: Greed    │ ← Index value + Classification
+└────────────────┘
+```
 
-> 📖 **Module details:** See [ARCHITECTURE_GUIDE.md](docs/ARCHITECTURE_GUIDE.md) for complete module documentation
+**Market Cap Module:**
+```
+┌────────────────┐
+│14:30      +2.5%│ ← Current time + 24h Change
+│MCap:      $1.2T│ ← Label + Total Market Cap
+└────────────────┘
+```
 
 ### Creating Custom Modules
 
@@ -361,6 +399,8 @@ Have questions? Check the comprehensive FAQ for answers!
 - **External Resources**:
   - WeatherAPI: https://www.weatherapi.com/
   - CoinGecko API: https://www.coingecko.com/api
+  - Fear & Greed Index: https://alternative.me/crypto/fear-and-greed-index/
+  - Altcoin Season Index: https://blockchaincenter.net/altcoin-season-index/
   - RPLCD Documentation: https://rplcd.readthedocs.io/
   - Raspberry Pi I2C Setup: https://learn.adafruit.com/adafruits-raspberry-pi-lesson-4-gpio-setup/configuring-i2c
 

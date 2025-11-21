@@ -54,11 +54,27 @@ rasp-crypto-ticker/
 │   │       ├── _print_clock()
 │   │       └── _lcd_write_string_centered()
 │   │
-│   └── 💰 crypto.py               ← CRYPTO MODULE
-│       └── CryptoModule(BaseModule)
-│           ├── fetch_data()      → CoinGecko API
-│           ├── display()         → N screens (1 per coin)
-│           └── _display_crypto()
+│   ├── 💰 crypto.py               ← CRYPTO MODULE
+│   │   └── CryptoModule(BaseModule)
+│   │       ├── fetch_data()      → CoinGecko API
+│   │       ├── display()         → N screens (1 per coin)
+│   │       └── _display_crypto()
+│   │
+│   ├── 😨 fear_greed.py           ← FEAR & GREED INDEX MODULE
+│   │   └── FearGreedModule(BaseModule)
+│   │       ├── fetch_data()      → Alternative.me API
+│   │       └── display()         → 1 screen (index + classification)
+│   │
+│   ├── 🔄 altcoin_season.py       ← ALTCOIN SEASON INDEX MODULE
+│   │   └── AltcoinSeasonModule(BaseModule)
+│   │       ├── fetch_data()      → Blockchaincenter.net API
+│   │       └── display()         → 1 screen (index + season type)
+│   │
+│   └── 💎 market_cap.py           ← MARKET CAP MODULE
+│       └── MarketCapModule(BaseModule)
+│           ├── fetch_data()      → CoinGecko Global API
+│           ├── display()         → 1 screen (total cap + 24h change)
+│           └── _format_market_cap()
 │
 └── 📚 docs/                      ← Documentation
     ├── ARCHITECTURE_GUIDE.md     ← This file
@@ -77,9 +93,19 @@ rasp-crypto-ticker/
 | `launcher.sh` | File | Shell script for launching the application (used by systemd) | ~20 |
 | `requirements.txt` | File | Python package dependencies | ~5 |
 | `modules/` | Directory | Contains all display modules | - |
-| `modules/base.py` | File | Abstract base class for all modules | ~60 |
+| `modules/base.py` | File | Abstract base class for all modules | ~96 |
 | `modules/weather.py` | File | Weather and time display module | ~86 |
-| `modules/crypto.py` | File | Cryptocurrency price display module | ~108 |
+| `modules/crypto.py` | File | Cryptocurrency price display module | ~85 |
+| `modules/fear_greed.py` | File | Fear & Greed Index display module | ~67 |
+| `modules/altcoin_season.py` | File | Altcoin Season Index display module | ~86 |
+| `modules/market_cap.py` | File | Total market cap display module | ~106 |
+| `clients/` | Directory | API client functions for external APIs | - |
+| `clients/weather_api.py` | File | WeatherAPI client | ~39 |
+| `clients/crypto_api.py` | File | CoinGecko prices client | ~45 |
+| `clients/fear_greed_api.py` | File | Fear & Greed Index client | ~40 |
+| `clients/altcoin_season_api.py` | File | Altcoin Season Index client | ~42 |
+| `clients/market_cap_api.py` | File | Global market cap client | ~40 |
+| `clients/ip_api.py` | File | IP address client | ~37 |
 | `docs/` | Directory | All project documentation | - |
 
 ---
@@ -158,7 +184,10 @@ main()
   │
   ├─→ initialize_modules()          # Create module instances
   │     ├─→ WeatherModule(lcd, config)
-  │     └─→ CryptoModule(lcd, config)
+  │     ├─→ CryptoModule(lcd, config)
+  │     ├─→ FearGreedModule(lcd, config)
+  │     ├─→ AltcoinSeasonModule(lcd, config)
+  │     └─→ MarketCapModule(lcd, config)
   │
   ├─→ display_module_status()       # Show enabled modules
   │

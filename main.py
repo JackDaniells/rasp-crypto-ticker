@@ -7,11 +7,15 @@ from config import (
     LCD_CONFIG,
     WEATHER_MODULE_CONFIG,
     CRYPTO_MODULE_CONFIG,
+    FEAR_GREED_MODULE_CONFIG,
+    MARKET_CAP_MODULE_CONFIG,
     APP_CONFIG,
     MODULE_ORDER
 )
 from modules.weather import WeatherModule
 from modules.crypto import CryptoModule
+from modules.fear_greed import FearGreedModule
+from modules.market_cap import MarketCapModule
 from clients import get_ip_address
 
 
@@ -88,6 +92,16 @@ def initialize_modules(lcd, ip):
     if CRYPTO_MODULE_CONFIG['enabled']:
         modules['crypto'] = CryptoModule(lcd, CRYPTO_MODULE_CONFIG)
         print("Crypto module initialized")
+    
+    # Initialize Fear & Greed Index Module
+    if FEAR_GREED_MODULE_CONFIG['enabled']:
+        modules['fear_greed'] = FearGreedModule(lcd, FEAR_GREED_MODULE_CONFIG)
+        print("Fear & Greed Index module initialized")
+    
+    # Initialize Market Cap Module
+    if MARKET_CAP_MODULE_CONFIG['enabled']:
+        modules['market_cap'] = MarketCapModule(lcd, MARKET_CAP_MODULE_CONFIG)
+        print("Market Cap module initialized")
     
     return modules
 
