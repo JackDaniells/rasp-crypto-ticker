@@ -11,7 +11,7 @@ This project turns your Raspberry Pi into an always-on information display that 
 - **📊 Live Cryptocurrency Prices**: Track Bitcoin, Ethereum, Solana, or any cryptocurrency from CoinGecko API, displaying current price and 24-hour change percentage.
 - **🌡️ Real-Time Weather**: Automatically detects your location via IP and displays current temperature, feels-like temperature, and weather conditions using WeatherAPI.
 - **😨 Fear & Greed Index**: Market sentiment indicator showing current index value and classification (Extreme Fear to Extreme Greed).
-- **🔄 Altcoin Season Index**: Shows what percentage of top 50 coins outperformed Bitcoin in the last 30 days (calculated from CoinGecko data), determining if it's Altcoin Season (≥75%), Bitcoin Season (≤25%), or Mixed (25-75%).
+- **🔄 Altcoin Season Index**: Shows what percentage of top 100 coins outperformed Bitcoin in the last 7 days and 30 days (displays two separate screens), determining if it's Altcoin Season (≥75%), Bitcoin Season (≤25%), or Mixed (25-75%).
 - **💎 Market Cap**: Total cryptocurrency market capitalization with 24h change percentage.
 - **🕐 Current Date & Time**: Shows the current date and time on each screen.
 
@@ -299,8 +299,9 @@ Five ready-to-use modules are included:
 - No API key required (Alternative.me public API)
 
 **🔄 Altcoin Season Module**
-- Displays: Percentage of top 50 coins outperforming Bitcoin (30-day period)
-- Calculated using CoinGecko API data
+- Displays: Percentage of top 100 coins outperforming Bitcoin (calculates 7d and 30d)
+- Shows two separate screens: Screen 1 (7-day), Screen 2 (30-day)
+- Each screen shows: timeframe, percentage, and season classification
 - Season thresholds: Alt Season (≥75%), BTC Season (≤25%), Mixed (25-75%)
 - Updates every 10 minutes (configurable)
 - No API key required (CoinGecko public API)
@@ -337,13 +338,29 @@ Five ready-to-use modules are included:
 └────────────────┘
 ```
 
-**Altcoin Season Module:**
+**Altcoin Season Module (2 screens):**
+
+Screen 1 (7-day):
 ```
 ┌────────────────┐
-│ Altcoin Season │ ← Title (centered)
-│68%   Alt Season│ ← Index % + Season indicator
+│  AltSeason 7d  │ ← Title + Timeframe (centered)
+│  53% - Mixed   │ ← Percentage + Season (centered)
 └────────────────┘
 ```
+
+Screen 2 (30-day):
+```
+┌────────────────┐
+│ AltSeason 30d  │ ← Title + Timeframe (centered)
+│  56% - Mixed   │ ← Percentage + Season (centered)
+└────────────────┘
+```
+
+**Note**: 
+- API returns both metrics: `{'value_7d': 53, 'value_30d': 56, 'timestamp': ...}`
+- 7d shows short-term trend (1 week)
+- 30d shows medium-term trend (1 month)
+- Each gets its own screen with season classification
 
 **Market Cap Module:**
 ```

@@ -76,8 +76,9 @@ MARKET_CAP_MODULE_CONFIG = {
 # ============================================================================
 # ALTCOIN SEASON MODULE CONFIGURATION
 # ============================================================================
-# Displays Altcoin Season Index: % of top 50 coins outperforming BTC over 30 days
+# Displays Altcoin Season Index: % of top 100 coins outperforming BTC over 7d and 30d
 # Calculated using CoinGecko API (free, no API key required)
+# Shows 2 screens: Screen 1 (7d), Screen 2 (30d) with percentage + season classification
 # Season indicators: 75%+ = Alt Season, 25%- = BTC Season, 25-75% = Mixed
 ALT_SEASON_MODULE_CONFIG = {
     'enabled': True,

@@ -398,29 +398,42 @@ ALT_SEASON_MODULE_CONFIG = {
 | `max_failed_attempts` | int | `3` | API failures before showing error |
 
 **Display Format:**
+
+Screen 1 (7-day):
 ```
- Altcoin Season
-68%    Alt Season
+  AltSeason 7d
+  53% - Mixed
+```
+
+Screen 2 (30-day):
+```
+ AltSeason 30d
+  56% - Mixed
 ```
 
 **Season Indicators:**
-- **Alt Season**: 75% or more of top 50 coins outperform Bitcoin (over 30 days)
+- **Alt Season**: 75% or more of top 100 coins outperform Bitcoin
 - **BTC Season**: 25% or fewer outperform Bitcoin
 - **Mixed**: Between 25-75%
 
 **What it shows:**
-- **Top line**: "Altcoin Season" title (centered)
-- **Bottom line**: Index percentage (left) and season indicator (right)
-- **Index meaning**: What percentage of the top 50 altcoins performed better than Bitcoin in the last 30 days
+- **Screen 1**: 7-day Altcoin Season Index with classification
+- **Screen 2**: 30-day Altcoin Season Index with classification
+- **Top line**: "AltSeason" + timeframe (7d or 30d) - centered
+- **Bottom line**: Percentage + season classification - centered
+- **7d metric**: Short-term trend (1 week performance comparison)
+- **30d metric**: Medium-term trend (1 month performance comparison)
+- **Index meaning**: What percentage of the top 100 altcoins performed better than Bitcoin
 
 **Implementation Details:**
 - **Source**: CoinGecko API (same as other modules)
 - **Calculation**: Self-calculated from CoinGecko market data
-- **Method**: Fetches top 50 coins, compares each coin's 30-day performance vs Bitcoin
+- **Method**: Fetches top 100 coins with 7d and 30d price changes, compares each against Bitcoin
+- **Dual screens**: Shows two separate screens, each with its own season classification
 - **No API key required** (uses CoinGecko free tier)
 - **Updates**: Every 10 minutes (configurable)
+- **Time**: Instant (single API call)
 - **Rate limit**: Shares CoinGecko rate limits with other modules (10-50 calls/minute)
-- **Note**: Uses 30-day period instead of traditional 90-day due to CoinGecko free API limitations
 
 **Use Cases:**
 - **Trading strategy**: Indicates when to focus on altcoins vs Bitcoin

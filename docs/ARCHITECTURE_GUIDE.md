@@ -68,8 +68,9 @@ rasp-crypto-ticker/
 │   ├── 🔄 alt_season.py           ← ALTCOIN SEASON MODULE
 │   │   └── AltSeasonModule(BaseModule)
 │   │       ├── fetch_data()      → CoinGecko API (calculated)
-│   │       ├── display()         → 1 screen (index % + season)
-│   │       └── _get_season()     → Determines season from index (30-day performance)
+│   │       ├── display()         → 2 screens (7d and 30d, each with % + season)
+│   │       ├── _display_screen() → Helper to display single timeframe
+│   │       └── _get_season()     → Determines season from index (Alt/BTC/Mixed)
 │   │
 │   └── 💎 market_cap.py           ← MARKET CAP MODULE
 │       └── MarketCapModule(BaseModule)
@@ -98,13 +99,13 @@ rasp-crypto-ticker/
 | `modules/weather.py` | File | Weather and time display module | ~86 |
 | `modules/crypto.py` | File | Cryptocurrency price display module | ~85 |
 | `modules/fear_greed.py` | File | Fear & Greed Index display module | ~67 |
-| `modules/alt_season.py` | File | Altcoin Season module | ~97 |
+| `modules/alt_season.py` | File | Altcoin Season module (7d + 30d, 2 screens) | ~110 |
 | `modules/market_cap.py` | File | Total market cap display module | ~106 |
 | `clients/` | Directory | API client functions for external APIs | - |
 | `clients/weather_api.py` | File | WeatherAPI client | ~39 |
 | `clients/crypto_api.py` | File | CoinGecko prices client | ~45 |
 | `clients/fear_greed_api.py` | File | Fear & Greed Index client | ~40 |
-| `clients/altcoin_season_api.py` | File | Altcoin Season Index calculator (uses CoinGecko) | ~90 |
+| `clients/altcoin_season_api.py` | File | Altcoin Season Index calculator (7d + 30d via CoinGecko) | ~147 |
 | `clients/market_cap_api.py` | File | Global market cap client | ~40 |
 | `clients/ip_api.py` | File | IP address client | ~37 |
 | `docs/` | Directory | All project documentation | - |
