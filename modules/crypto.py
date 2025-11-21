@@ -39,10 +39,7 @@ class CryptoModule(BaseModule):
     
     def display(self):
         """Display cryptocurrency information"""
-        if not self.data:
-            self.update_data()
-        
-        if not self.data:
+        if not self.is_data_ready():
             return
         
         # Display each crypto for configured duration

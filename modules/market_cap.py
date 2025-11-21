@@ -41,10 +41,7 @@ class MarketCapModule(BaseModule):
     
     def display(self):
         """Display market cap on LCD"""
-        if not self.data:
-            self.update_data()
-        
-        if not self.data:
+        if not self.is_data_ready():
             return
         
         # Get market cap and change percentage

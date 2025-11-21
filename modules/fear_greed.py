@@ -35,10 +35,7 @@ class FearGreedModule(BaseModule):
     
     def display(self):
         """Display Fear and Greed Index on LCD"""
-        if not self.data:
-            self.update_data()
-        
-        if not self.data:
+        if not self.is_data_ready():
             return
         
         # Get index value and classification

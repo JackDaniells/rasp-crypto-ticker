@@ -56,6 +56,19 @@ class BaseModule(ABC):
         current_time = datetime.now().timestamp()
         return (current_time - self.last_update) >= self.update_interval
     
+    def is_data_ready(self):
+        """
+        Check if data is ready for display, updating if necessary
+        
+        Returns:
+            bool: True if data is available, False otherwise
+        """
+        if not self.data:
+            self.update_data()
+            if not self.data:
+                return False
+        return True
+    
     def update_data(self):
         """
         Update module data and timestamp
