@@ -10,6 +10,7 @@ from datetime import datetime
 from modules.base import BaseModule
 from clients import get_global_data
 from utils import format_large_number
+from utils.lcd_wrapper import ROW_FIRST, ROW_SECOND, POS_RIGHT
 
 
 class MarketCapModule(BaseModule):
@@ -64,21 +65,15 @@ class MarketCapModule(BaseModule):
         
         # Line 1: Time and 24h change
         now = datetime.now()
-        self.lcd.cursor_pos = (0, 0)
-        self.lcd.write_string(now.strftime("%H:%M"))
-        
+        self.lcd.write_string(row=ROW_FIRST, text=now.strftime("%H:%M"))
         # Right-align 24h change
-        self.lcd.cursor_pos = (0, 16 - len(change_str))
-        self.lcd.write_string(change_str)
+        self.lcd.write_string(row=ROW_FIRST, text=change_str, pos=POS_RIGHT)
         
         # Line 2: Market cap label (left) and value (right)
-        self.lcd.cursor_pos = (1, 0)
-        self.lcd.write_string("Mkt. Cap:")
-        
+        self.lcd.write_string(row=ROW_SECOND, text="Mkt. Cap:")
         # Right-align market cap value
         value_text = f"${market_cap_str}"
-        self.lcd.cursor_pos = (1, 16 - len(value_text))
-        self.lcd.write_string(value_text)
+        self.lcd.write_string(row=ROW_SECOND, text=value_text, pos=POS_RIGHT)
         
         time.sleep(self.display_duration)
 

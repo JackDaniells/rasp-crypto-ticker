@@ -4,6 +4,7 @@ import time
 from datetime import datetime
 from .base import BaseModule
 from clients import get_weather
+from utils.lcd_wrapper import POS_CENTER, ROW_FIRST, ROW_SECOND
 
 
 class WeatherModule(BaseModule):
@@ -36,17 +37,11 @@ class WeatherModule(BaseModule):
         
         return data
     
-    def _lcd_write_string_centered(self, row, text):
-        """Write string on LCD row centered"""
-        position = max(round((self.lcd_max_size - len(text)) / 2), 0)
-        self.lcd.cursor_pos = (row, position)
-        self.lcd.write_string(text)
     
     def _print_clock(self):
         """Print date and time on first row"""
-        self.lcd.cursor_pos = (0, 0)
         now = datetime.now()
-        self.lcd.write_string(now.strftime("%d/%m/%Y %H:%M"))
+        self.lcd.write_string(row=ROW_FIRST, text=now.strftime("%d/%m/%Y %H:%M"))
     
     def display(self):
         """Display weather and time information across multiple screens"""
@@ -56,8 +51,6 @@ class WeatherModule(BaseModule):
         unit = self.temperature_unit.upper()
         temp = self.data.get('current', {}).get(f'temp_{unit.lower()}', '--')
         feelslike = self.data.get('current', {}).get(f'feelslike_{unit.lower()}', '--')
-        
-        # Get other weather data
         condition = self.data.get('current', {}).get('condition', {}).get('text', '--')
         location_name = self.data.get('location', {}).get('name', '--')
         location_country = self.data.get('location', {}).get('country', '')
@@ -70,27 +63,25 @@ class WeatherModule(BaseModule):
             location_text = f"{location_name}, {location_country}"
         else:
             location_text = location_name
-        self._lcd_write_string_centered(1, location_text)
+        self.lcd.write_string(row=ROW_SECOND, text=location_text, pos=POS_CENTER)
         time.sleep(self.display_duration)
 
         # Screen 2: Temperature
         self.lcd.clear()
         self._print_clock()
-        text = f"Temp: {temp}{unit}"
-        self._lcd_write_string_centered(1, text)
+        self.lcd.write_string(row=ROW_SECOND, text=f"Temp: {temp}{unit}", pos=POS_CENTER)
         time.sleep(self.display_duration)
         
         # Screen 3: Feels like
         self.lcd.clear()
         self._print_clock()
-        text = f"Sens: {feelslike}{unit}"
-        self._lcd_write_string_centered(1, text)
+        self.lcd.write_string(row=ROW_SECOND, text=f"Sens: {feelslike}{unit}", pos=POS_CENTER)
         time.sleep(self.display_duration)
         
         # Screen 4: Condition
         self.lcd.clear()
         self._print_clock()
-        self._lcd_write_string_centered(1, condition)
+        self.lcd.write_string(row=ROW_SECOND, text=condition, pos=POS_CENTER)
         time.sleep(self.display_duration)
         
     

@@ -17,6 +17,7 @@ import time
 from datetime import datetime
 from modules.base import BaseModule
 from clients import get_altcoin_season_index
+from utils.lcd_wrapper import POS_CENTER, ROW_FIRST, ROW_SECOND
 
 
 class AltSeasonModule(BaseModule):
@@ -95,16 +96,12 @@ class AltSeasonModule(BaseModule):
         self.lcd.clear()
         
         # Line 1: Title with timeframe (centered)
-        title = f'AltSeason {timeframe}'
-        title_pos = max(0, (16 - len(title)) // 2)
-        self.lcd.cursor_pos = (0, title_pos)
-        self.lcd.write_string(title[:16])
+        title = f'Alt Season ({timeframe})'
+        self.lcd.write_string(row=ROW_FIRST, text=title, pos=POS_CENTER)
         
         # Line 2: Percentage and season indicator (centered)
         display_text = f"{value_str} - {season}"
-        text_pos = max(0, (16 - len(display_text)) // 2)
-        self.lcd.cursor_pos = (1, text_pos)
-        self.lcd.write_string(display_text[:16])
+        self.lcd.write_string(row=ROW_SECOND, text=display_text, pos=POS_CENTER)
         
         time.sleep(self.display_duration)
 

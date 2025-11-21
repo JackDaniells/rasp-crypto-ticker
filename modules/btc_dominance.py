@@ -11,6 +11,7 @@ Lower dominance (<40%) often indicates Altcoin Season
 import time
 from .base import BaseModule
 from clients import get_global_data
+from utils.lcd_wrapper import POS_CENTER, ROW_FIRST, ROW_SECOND
 
 
 class BtcDominanceModule(BaseModule):
@@ -19,7 +20,6 @@ class BtcDominanceModule(BaseModule):
     def __init__(self, lcd, config):
         super().__init__('BTC Dominance', lcd, config)
         self.timeout = config.get('timeout', 10)
-        self.lcd_max_size = config.get('lcd_max_size', 16)
     
     def fetch_data(self):
         """Fetch Bitcoin dominance from CoinGecko API"""
@@ -90,15 +90,11 @@ class BtcDominanceModule(BaseModule):
         
         # Line 1: Title (centered)
         title = 'BTC Dominance'
-        title_pos = max(0, (16 - len(title)) // 2)
-        self.lcd.cursor_pos = (0, title_pos)
-        self.lcd.write_string(title[:16])
+        self.lcd.write_string(row=ROW_FIRST, text=title, pos=POS_CENTER)
         
         # Line 2: Dominance percentage and status (centered)
         display_text = f"{dominance_str} - {status}"
-        text_pos = max(0, (16 - len(display_text)) // 2)
-        self.lcd.cursor_pos = (1, text_pos)
-        self.lcd.write_string(display_text[:16])
+        self.lcd.write_string(row=ROW_SECOND, text=display_text, pos=POS_CENTER)
         
         time.sleep(self.display_duration)
 

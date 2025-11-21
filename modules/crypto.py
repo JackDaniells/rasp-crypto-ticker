@@ -4,6 +4,7 @@ import time
 from datetime import datetime
 from .base import BaseModule
 from clients import get_crypto_prices
+from utils.lcd_wrapper import ROW_FIRST, ROW_SECOND, POS_RIGHT
 
 
 class CryptoModule(BaseModule):
@@ -54,27 +55,21 @@ class CryptoModule(BaseModule):
         """Display a single cryptocurrency"""
         self.lcd.clear()
         
+        # first row: time and 24h change percentage
         # Display time
         now = datetime.now()
-        self.lcd.cursor_pos = (0, 0)
-        self.lcd.write_string(now.strftime("%H:%M"))
-        
+        self.lcd.write_string(row=ROW_FIRST, text=now.strftime("%H:%M"))
         # Display 24h change percentage (use dummy value if missing)
         change_key = f'{self.fiat}_24h_change'
         variation = str(round(data.get(change_key, 0), 1))
+        self.lcd.write_string(row=ROW_FIRST, text=f"{variation}%", pos=POS_RIGHT)
         
-        self.lcd.cursor_pos = (0, self.lcd_max_size - len(variation) - 1)
-        self.lcd.write_string(f"{variation}%")
-        
+        # second row: crypto acronym and value
         # Display crypto acronym (e.g., 'BTC')
-        self.lcd.cursor_pos = (1, 0)
-        self.lcd.write_string(f"{acronym}:")
-        
+        self.lcd.write_string(row=ROW_SECOND, text=f"{acronym}:")
         # Display crypto value (use dummy value if missing)
         value = str(data.get(self.fiat, '--'))
-        
-        self.lcd.cursor_pos = (1, self.lcd_max_size - len(value) - 1)
-        self.lcd.write_string(f"${value}")
+        self.lcd.write_string(row=ROW_SECOND, text=f"${value}", pos=POS_RIGHT)
     
     def get_display_count(self):
         """Return number of screens this module displays"""

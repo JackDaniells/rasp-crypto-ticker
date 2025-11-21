@@ -2,6 +2,7 @@
 
 import time
 from RPLCD.i2c import CharLCD
+from utils.lcd_wrapper import SafeLCD, POS_CENTER, ROW_FIRST, ROW_SECOND
 
 from config import (
     LCD_CONFIG,
@@ -23,16 +24,9 @@ from modules.btc_dominance import BtcDominanceModule
 from clients import get_ip_address
 
 
-def lcd_write_string_centered(lcd, row, text, max_size=16):
-    """Write string on LCD row centered"""
-    position = max(round((max_size - len(text)) / 2), 0)
-    lcd.cursor_pos = (row, position)
-    lcd.write_string(text)
-
-
 def init_lcd(version):
-    """Initialize LCD 16x2 screen"""
-    lcd = CharLCD(
+    """Initialize LCD 16x2 screen with SafeLCD wrapper"""
+    raw_lcd = CharLCD(
         i2c_expander='PCF8574',
         address=LCD_CONFIG['address'],
         port=LCD_CONFIG['port'],
@@ -40,10 +34,14 @@ def init_lcd(version):
         rows=LCD_CONFIG['rows'],
         dotsize=LCD_CONFIG['dotsize']
     )
+    
+    # Wrap LCD with SafeLCD for automatic text validation
+    lcd = SafeLCD(raw_lcd, max_size=LCD_CONFIG['max_size'])
+    
     time.sleep(2)
     lcd.clear()
-    lcd_write_string_centered(lcd, 0, "CRYPTO TICKER", LCD_CONFIG['max_size'])
-    lcd_write_string_centered(lcd, 1, version, LCD_CONFIG['max_size'])
+    lcd.write_string(row=ROW_FIRST, text="CRYPTO TICKER", pos=POS_CENTER)
+    lcd.write_string(row=ROW_SECOND, text=version, pos=POS_CENTER)
     time.sleep(10)
     return lcd
 
@@ -63,20 +61,20 @@ def establish_connection(lcd):
     ip = None
     
     while ip is None:
-        lcd_write_string_centered(lcd, 0, "Connecting...", LCD_CONFIG['max_size'])
+        lcd.write_string(row=ROW_FIRST, text="Connecting...", pos=POS_CENTER)
         ip = fetch_ip_address()
         
         if ip is None:
             lcd.clear()
-            lcd_write_string_centered(lcd, 0, "Conn. error", LCD_CONFIG['max_size'])
-            lcd_write_string_centered(lcd, 1, "Retrying...", LCD_CONFIG['max_size'])
+            lcd.write_string(row=ROW_FIRST, text="Conn. error", pos=POS_CENTER)
+            lcd.write_string(row=ROW_SECOND, text="Retrying...", pos=POS_CENTER)
             time.sleep(APP_CONFIG['retry_delay'])
         else:
             print(f"Connected! IP: {ip}")
     
     lcd.clear()
-    lcd_write_string_centered(lcd, 0, "Connected!", LCD_CONFIG['max_size'])
-    lcd_write_string_centered(lcd, 1, f"IP:{ip}", LCD_CONFIG['max_size'])
+    lcd.write_string(row=ROW_FIRST, text="Connected!", pos=POS_CENTER)
+    lcd.write_string(row=ROW_SECOND, text=f"IP:{ip}", pos=POS_CENTER)
     time.sleep(2)
     return ip
 
@@ -123,8 +121,8 @@ def initialize_modules(lcd, ip):
 def display_module_error(lcd):
     """Display error message when no modules are active"""
     lcd.clear()
-    lcd_write_string_centered(lcd, 0, "No modules", LCD_CONFIG['max_size'])
-    lcd_write_string_centered(lcd, 1, "enabled!", LCD_CONFIG['max_size'])
+    lcd.write_string(row=ROW_FIRST, text="No modules", pos=POS_CENTER)
+    lcd.write_string(row=ROW_SECOND, text="enabled!", pos=POS_CENTER)
     time.sleep(5)
 
 
@@ -165,7 +163,7 @@ def main():
         except KeyboardInterrupt:
             print("\nShutting down...")
             lcd.clear()
-            lcd_write_string_centered(lcd, 0, "Goodbye!", LCD_CONFIG['max_size'])
+            lcd.write_string(row=ROW_FIRST, text="Goodbye!", pos=POS_CENTER)
             time.sleep(2)
             lcd.clear()
             break
@@ -174,8 +172,8 @@ def main():
             print(f"Error in main loop: {e}")
             try:
                 lcd.clear()
-                lcd_write_string_centered(lcd, 0, "Display Error", LCD_CONFIG['max_size'])
-                lcd_write_string_centered(lcd, 1, "Recovering...", LCD_CONFIG['max_size'])
+                lcd.write_string(row=ROW_FIRST, text="Display Error", pos=POS_CENTER)
+                lcd.write_string(row=ROW_SECOND, text="Recovering...", pos=POS_CENTER)
             except Exception as lcd_error:
                 print(f"LCD error: {lcd_error}")
             time.sleep(5)

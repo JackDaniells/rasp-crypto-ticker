@@ -9,6 +9,7 @@ import time
 from datetime import datetime
 from modules.base import BaseModule
 from clients import get_fear_greed_index
+from utils.lcd_wrapper import POS_CENTER, ROW_FIRST, ROW_SECOND
 
 
 class FearGreedModule(BaseModule):
@@ -58,18 +59,11 @@ class FearGreedModule(BaseModule):
         
         # Align center "Fear&Greed Idx." on first line
         title = "Fear&Greed Idx"
-        title_pos = (16 - len(title)) // 2
-        self.lcd.cursor_pos = (0, title_pos)
-        self.lcd.write_string(title)
+        self.lcd.write_string(row=ROW_FIRST, text=title, pos=POS_CENTER)
         
         # Line 2: Value and classification
-        self.lcd.cursor_pos = (1, 0)
         display_text = f"{index_value} - {classification}"
-        
-        # Center the text
-        text_pos = max(0, (16 - len(display_text)) // 2)
-        self.lcd.cursor_pos = (1, text_pos)
-        self.lcd.write_string(display_text[:16])
+        self.lcd.write_string(row=ROW_SECOND, text=display_text, pos=POS_CENTER)
         
         time.sleep(self.display_duration)
 

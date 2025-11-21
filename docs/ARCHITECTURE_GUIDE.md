@@ -102,6 +102,13 @@ rasp-crypto-ticker/
 │   ├── 🔄 altcoin_season_api.py   ← Altcoin Season calculator (with caching)
 │   └── 🌐 ip_api.py               ← IP address client (no caching)
 │
+├── 🛠️  utils/                     ← Utility directory
+│   ├── __init__.py               ← Utility functions (format_large_number)
+│   └── 📺 lcd_wrapper.py          ← LCD DISPLAY WRAPPER
+│       ├── SafeLCD class         → Automatic text validation & positioning
+│       ├── ROW_FIRST, ROW_SECOND → Row constants (0, 1)
+│       └── POS_LEFT, POS_CENTER, POS_RIGHT → Alignment constants
+│
 └── 📚 docs/                      ← Documentation
     ├── ARCHITECTURE_GUIDE.md     ← This file
     ├── I2C_SETUP.md              ← I2C setup guide
@@ -134,8 +141,9 @@ rasp-crypto-ticker/
 | `clients/coingecko_global_api.py` | File | CoinGecko Global API with caching (market cap, BTC dominance, etc) |
 | `clients/altcoin_season_api.py` | File | Altcoin Season Index calculator (7d + 30d via CoinGecko) with caching |
 | `clients/ip_api.py` | File | IP address client (no caching needed) |
-| `utils/` | Directory | Utility functions |
+| `utils/` | Directory | Utility functions and wrappers |
 | `utils/__init__.py` | File | Utility functions (format_large_number) |
+| `utils/lcd_wrapper.py` | File | LCD display wrapper (SafeLCD class, row/position constants) |
 | `docs/` | Directory | All project documentation |
 
 ---
@@ -254,6 +262,57 @@ Module Creation
 Note: API clients handle caching internally using cache_utils.py
       Modules pass update_interval as cache_duration to API clients
 ```
+
+---
+
+### LCD Display Wrapper (`utils/lcd_wrapper.py`)
+
+**Purpose**: Centralized LCD display logic with automatic text validation and positioning
+
+**SafeLCD Class:**
+```python
+from utils.lcd_wrapper import SafeLCD, ROW_FIRST, ROW_SECOND, POS_LEFT, POS_CENTER, POS_RIGHT
+
+# Wraps the raw CharLCD instance
+lcd = SafeLCD(raw_lcd, max_size=16)
+
+# Write text with automatic truncation and positioning
+lcd.write_string(row=ROW_FIRST, text='Bitcoin', pos=POS_LEFT)
+lcd.write_string(row=ROW_SECOND, text='$99,000', pos=POS_RIGHT)
+lcd.write_string(row=ROW_FIRST, text='Alt Season', pos=POS_CENTER)
+```
+
+**Benefits:**
+1. **Automatic Text Truncation**: All text is automatically truncated to max_size (16 characters), preventing display corruption
+2. **Centralized Positioning Logic**: Text alignment (left/center/right) handled in one place
+3. **Self-Documenting Code**: Constants (ROW_FIRST, POS_CENTER) make code more readable than magic numbers
+4. **Consistent Interface**: All modules use the same write_string method with keyword arguments
+5. **Transparent Wrapper**: All other CharLCD methods pass through unchanged via `__getattr__`
+
+**Constants:**
+- **Row Constants**: `ROW_FIRST = 0`, `ROW_SECOND = 1` (for 16x2 LCD)
+- **Position Constants**: `POS_LEFT`, `POS_CENTER`, `POS_RIGHT` (text alignment)
+
+**Before SafeLCD:**
+```python
+# Old way - manual cursor positioning, manual truncation
+self.lcd.clear()
+self.lcd.cursor_pos = (0, 0)
+self.lcd.write_string(text[:16])  # Manual truncation
+title_pos = (16 - len(title)) // 2  # Manual centering
+self.lcd.cursor_pos = (1, title_pos)
+self.lcd.write_string(title[:16])
+```
+
+**After SafeLCD:**
+```python
+# New way - clean, readable, safe
+self.lcd.clear()
+self.lcd.write_string(row=ROW_FIRST, text=text, pos=POS_LEFT)
+self.lcd.write_string(row=ROW_SECOND, text=title, pos=POS_CENTER)
+```
+
+---
 
 **3. Configuration Flow**
 
