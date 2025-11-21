@@ -9,6 +9,7 @@ from config import (
     CRYPTO_MODULE_CONFIG,
     FEAR_GREED_MODULE_CONFIG,
     MARKET_CAP_MODULE_CONFIG,
+    ALT_SEASON_MODULE_CONFIG,
     APP_CONFIG,
     MODULE_ORDER
 )
@@ -16,6 +17,7 @@ from modules.weather import WeatherModule
 from modules.crypto import CryptoModule
 from modules.fear_greed import FearGreedModule
 from modules.market_cap import MarketCapModule
+from modules.alt_season import AltSeasonModule
 from clients import get_ip_address
 
 
@@ -102,6 +104,11 @@ def initialize_modules(lcd, ip):
     if MARKET_CAP_MODULE_CONFIG['enabled']:
         modules['market_cap'] = MarketCapModule(lcd, MARKET_CAP_MODULE_CONFIG)
         print("Market Cap module initialized")
+    
+    # Initialize Altcoin Season Module
+    if ALT_SEASON_MODULE_CONFIG['enabled']:
+        modules['alt_season'] = AltSeasonModule(lcd, ALT_SEASON_MODULE_CONFIG)
+        print("Altcoin Season module initialized")
     
     return modules
 

@@ -55,10 +55,9 @@ class FearGreedModule(BaseModule):
         
         # Display Fear & Greed Index
         self.lcd.clear()
-    
         
-        # Align center "F&G Index" on first line
-        title = "F&G Index"
+        # Align center "Fear&Greed Idx." on first line
+        title = "Fear & Greed"
         title_pos = (16 - len(title)) // 2
         self.lcd.cursor_pos = (0, title_pos)
         self.lcd.write_string(title)

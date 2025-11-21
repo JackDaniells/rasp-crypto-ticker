@@ -10,6 +10,9 @@ This project turns your Raspberry Pi into an always-on information display that 
 
 - **📊 Live Cryptocurrency Prices**: Track Bitcoin, Ethereum, Solana, or any cryptocurrency from CoinGecko API, displaying current price and 24-hour change percentage.
 - **🌡️ Real-Time Weather**: Automatically detects your location via IP and displays current temperature, feels-like temperature, and weather conditions using WeatherAPI.
+- **😨 Fear & Greed Index**: Market sentiment indicator showing current index value and classification (Extreme Fear to Extreme Greed).
+- **🔄 Altcoin Season Index**: Shows what percentage of top 50 coins outperformed Bitcoin in the last 30 days (calculated from CoinGecko data), determining if it's Altcoin Season (≥75%), Bitcoin Season (≤25%), or Mixed (25-75%).
+- **💎 Market Cap**: Total cryptocurrency market capitalization with 24h change percentage.
 - **🕐 Current Date & Time**: Shows the current date and time on each screen.
 
 The display automatically cycles through configured modules, fetching fresh data at regular intervals. Each module can be independently enabled, disabled, and customized to fit your needs.
@@ -206,8 +209,8 @@ rasp-crypto-ticker/
 │   ├── weather_api.py          → WeatherAPI endpoint (returns data or None)
 │   ├── crypto_api.py           → CoinGecko API endpoint (returns data or None)
 │   ├── fear_greed_api.py       → Fear & Greed Index endpoint
-│   ├── altcoin_season_api.py   → Altcoin Season Index endpoint
 │   ├── market_cap_api.py       → Global market cap endpoint
+│   ├── altcoin_season_api.py   → Altcoin Season Index endpoint
 │   └── ip_api.py               → IP address endpoint (returns IP or None)
 │
 ├── modules/          ← Display Layer (data presentation)
@@ -216,7 +219,7 @@ rasp-crypto-ticker/
 │   ├── weather.py            → Weather & time display module
 │   ├── crypto.py             → Cryptocurrency price display module
 │   ├── fear_greed.py         → Fear & Greed Index display module
-│   ├── altcoin_season.py     → Altcoin Season Index display module
+│   ├── alt_season.py         → Altcoin Season module
 │   └── market_cap.py         → Total market cap display module
 │
 └── docs/             ← Documentation (setup guides and references)
@@ -275,7 +278,7 @@ See **[CONFIGURATION_GUIDE.md](docs/CONFIGURATION_GUIDE.md)**
 
 ### Built-in Modules
 
-Four ready-to-use modules are included:
+Five ready-to-use modules are included:
 
 **🌡️ Weather & Time Module**
 - Displays: Temperature, Feels Like, Weather Condition
@@ -294,6 +297,13 @@ Four ready-to-use modules are included:
 - Classification: Extreme Fear, Fear, Neutral, Greed, Extreme Greed
 - Updates every 1 hour (configurable)
 - No API key required (Alternative.me public API)
+
+**🔄 Altcoin Season Module**
+- Displays: Percentage of top 50 coins outperforming Bitcoin (30-day period)
+- Calculated using CoinGecko API data
+- Season thresholds: Alt Season (≥75%), BTC Season (≤25%), Mixed (25-75%)
+- Updates every 10 minutes (configurable)
+- No API key required (CoinGecko public API)
 
 **💎 Market Cap Module**
 - Displays: Total cryptocurrency market capitalization
@@ -324,6 +334,14 @@ Four ready-to-use modules are included:
 ┌────────────────┐
 │14:30  F&G Index│ ← Current time + Title
 │   68: Greed    │ ← Index value + Classification
+└────────────────┘
+```
+
+**Altcoin Season Module:**
+```
+┌────────────────┐
+│ Altcoin Season │ ← Title (centered)
+│68%   Alt Season│ ← Index % + Season indicator
 └────────────────┘
 ```
 

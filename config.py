@@ -74,6 +74,20 @@ MARKET_CAP_MODULE_CONFIG = {
 }
 
 # ============================================================================
+# ALTCOIN SEASON MODULE CONFIGURATION
+# ============================================================================
+# Displays Altcoin Season Index: % of top 50 coins outperforming BTC over 30 days
+# Calculated using CoinGecko API (free, no API key required)
+# Season indicators: 75%+ = Alt Season, 25%- = BTC Season, 25-75% = Mixed
+ALT_SEASON_MODULE_CONFIG = {
+    'enabled': True,
+    'update_interval': 600,   # 10 minutes
+    'display_duration': 5,   # seconds
+    'timeout': 10,
+    'max_failed_attempts': 3
+}
+
+# ============================================================================
 # APPLICATION CONFIGURATION
 # ============================================================================
 APP_CONFIG = {
@@ -85,7 +99,7 @@ APP_CONFIG = {
 # ============================================================================
 # MODULE DISPLAY ORDER
 # ============================================================================
-MODULE_ORDER = ['weather', 'fear_greed', 'market_cap'] + ['crypto'] * 3
+MODULE_ORDER = ['weather', 'fear_greed', 'alt_season', 'market_cap'] + ['crypto'] * 3
 
 # ============================================================================
 # QUICK REFERENCE

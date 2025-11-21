@@ -70,12 +70,12 @@ CRYPTO_MODULE_CONFIG = {
 
 **Show Crypto First:**
 ```python
-MODULE_ORDER = ['crypto', 'weather', 'fear_greed', 'altcoin_season', 'market_cap']
+MODULE_ORDER = ['crypto', 'weather', 'fear_greed', 'alt_season', 'market_cap']
 ```
 
 **Crypto and Market Indicators Only:**
 ```python
-MODULE_ORDER = ['crypto', 'fear_greed', 'altcoin_season', 'market_cap']
+MODULE_ORDER = ['crypto', 'fear_greed', 'alt_season', 'market_cap']
 ```
 
 **Repeat Modules:**
@@ -90,7 +90,7 @@ MODULE_ORDER = ['crypto'] * 2 + ['fear_greed', 'weather']
 WEATHER_MODULE_CONFIG['display_duration'] = 5
 CRYPTO_MODULE_CONFIG['display_duration'] = 5
 FEAR_GREED_MODULE_CONFIG['display_duration'] = 5
-ALTCOIN_SEASON_MODULE_CONFIG['display_duration'] = 5
+ALT_SEASON_MODULE_CONFIG['display_duration'] = 5
 MARKET_CAP_MODULE_CONFIG['display_duration'] = 5
 ```
 
@@ -99,7 +99,7 @@ MARKET_CAP_MODULE_CONFIG['display_duration'] = 5
 WEATHER_MODULE_CONFIG['update_interval'] = 1800
 CRYPTO_MODULE_CONFIG['update_interval'] = 1800
 FEAR_GREED_MODULE_CONFIG['update_interval'] = 1800
-ALTCOIN_SEASON_MODULE_CONFIG['update_interval'] = 1800
+ALT_SEASON_MODULE_CONFIG['update_interval'] = 1800
 MARKET_CAP_MODULE_CONFIG['update_interval'] = 1800
 ```
 
@@ -375,7 +375,63 @@ HH:MM    F&G Index
 
 ---
 
-### 5. Market Cap Module Configuration
+### 5. Altcoin Season Module Configuration
+
+```python
+ALT_SEASON_MODULE_CONFIG = {
+    'enabled': True,
+    'update_interval': 600,   # 10 minutes
+    'display_duration': 5,    # seconds
+    'timeout': 10,
+    'max_failed_attempts': 3
+}
+```
+
+**Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `enabled` | bool | `True` | Enable/disable Altcoin Season module |
+| `update_interval` | int | `600` | Seconds between API updates (10 min) |
+| `display_duration` | int | `5` | Seconds to display on screen |
+| `timeout` | int | `10` | API request timeout (seconds) |
+| `max_failed_attempts` | int | `3` | API failures before showing error |
+
+**Display Format:**
+```
+ Altcoin Season
+68%    Alt Season
+```
+
+**Season Indicators:**
+- **Alt Season**: 75% or more of top 50 coins outperform Bitcoin (over 30 days)
+- **BTC Season**: 25% or fewer outperform Bitcoin
+- **Mixed**: Between 25-75%
+
+**What it shows:**
+- **Top line**: "Altcoin Season" title (centered)
+- **Bottom line**: Index percentage (left) and season indicator (right)
+- **Index meaning**: What percentage of the top 50 altcoins performed better than Bitcoin in the last 30 days
+
+**Implementation Details:**
+- **Source**: CoinGecko API (same as other modules)
+- **Calculation**: Self-calculated from CoinGecko market data
+- **Method**: Fetches top 50 coins, compares each coin's 30-day performance vs Bitcoin
+- **No API key required** (uses CoinGecko free tier)
+- **Updates**: Every 10 minutes (configurable)
+- **Rate limit**: Shares CoinGecko rate limits with other modules (10-50 calls/minute)
+- **Note**: Uses 30-day period instead of traditional 90-day due to CoinGecko free API limitations
+
+**Use Cases:**
+- **Trading strategy**: Indicates when to focus on altcoins vs Bitcoin
+- **Market timing**: Helps identify optimal entry/exit points for altcoins
+- **Risk management**: High index = altcoin gains, low index = Bitcoin dominance
+- **Portfolio rebalancing**: Use to adjust Bitcoin vs altcoin allocation
+- **Momentum indicator**: 30-day performance trend shows recent market direction
+
+---
+
+### 6. Market Cap Module Configuration
 
 ```python
 MARKET_CAP_MODULE_CONFIG = {
@@ -426,7 +482,7 @@ MCap:       $1.2T
 
 ---
 
-### 6. Application Configuration
+### 7. Application Configuration
 
 ```python
 APP_CONFIG = {
@@ -451,10 +507,10 @@ APP_CONFIG = {
 
 ---
 
-### 7. Module Display Order
+### 8. Module Display Order
 
 ```python
-MODULE_ORDER = ['weather', 'crypto', 'fear_greed', 'altcoin_season', 'market_cap']
+MODULE_ORDER = ['weather', 'crypto', 'fear_greed', 'alt_season', 'market_cap']
 ```
 
 **Description:**
@@ -471,16 +527,16 @@ Determines the sequence in which modules are displayed in the main loop.
 
 ```python
 # All modules (default)
-MODULE_ORDER = ['weather', 'crypto', 'fear_greed', 'altcoin_season', 'market_cap']
+MODULE_ORDER = ['weather', 'crypto', 'fear_greed', 'alt_season', 'market_cap']
 
 # Crypto-focused display
-MODULE_ORDER = ['crypto', 'fear_greed', 'market_cap', 'altcoin_season']
+MODULE_ORDER = ['crypto', 'fear_greed', 'market_cap', 'alt_season']
 
 # Traditional ticker (no market indicators)
 MODULE_ORDER = ['weather', 'crypto']
 
 # Market sentiment only
-MODULE_ORDER = ['fear_greed', 'altcoin_season', 'market_cap']
+MODULE_ORDER = ['fear_greed', 'alt_season', 'market_cap']
 
 # Repeated modules
 MODULE_ORDER = ['crypto', 'crypto', 'fear_greed', 'weather']
