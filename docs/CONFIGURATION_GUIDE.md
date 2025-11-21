@@ -681,53 +681,72 @@ MODULE_ORDER = ['weather', 'crypto']
 
 ---
 
-### Example 3: Weather Focus
+### Example 3: Weather & Time Focus
 
 ```python
-# Enable all
+# Enable weather and minimal crypto
 WEATHER_MODULE_CONFIG['enabled'] = True
+WEATHER_MODULE_CONFIG['display_duration'] = 8
 CRYPTO_MODULE_CONFIG['enabled'] = True
+CRYPTO_MODULE_CONFIG['display_duration'] = 8
+CRYPTO_MODULE_CONFIG['symbols'] = {'BTC': 'bitcoin'}
 
-# Weather first, crypto minimal
-CRYPTO_MODULE_CONFIG['symbols'] = {
-    'BTC': 'bitcoin',
-}
+# Other modules disabled
+FEAR_GREED_MODULE_CONFIG['enabled'] = False
+BTC_DOMINANCE_MODULE_CONFIG['enabled'] = False
+ALT_SEASON_MODULE_CONFIG['enabled'] = False
+MARKET_CAP_MODULE_CONFIG['enabled'] = False
 
-# Custom order
+# Simple order
 MODULE_ORDER = ['weather', 'crypto']
 ```
 
-**Result:** Weather (40s) + BTC (10s) = 50-second cycle
+**Result:** 
+- Weather: 4 screens × 8s = 32s
+- Crypto: 1 screen × 8s = 8s
+- **Total:** 40-second cycle
 
 ---
 
-### Example 4: Dual Currency Portfolio
+### Example 4: Portfolio Tracker with Market Indicators
 
 ```python
-# Enable crypto only
+# Crypto focus with market sentiment
 WEATHER_MODULE_CONFIG['enabled'] = False
-CRYPTO_MODULE_CONFIG['enabled'] = True
 
-# Portfolio tracking
+CRYPTO_MODULE_CONFIG['enabled'] = True
+CRYPTO_MODULE_CONFIG['display_duration'] = 6
 CRYPTO_MODULE_CONFIG['symbols'] = {
     'BTC': 'bitcoin',
     'ETH': 'ethereum',
     'SOL': 'solana',
     'ADA': 'cardano',
-    'DOT': 'polkadot',
-    'LINK': 'chainlink',
-    'AVAX': 'avalanche-2',
-    'MATIC': 'matic-network',
+    'DOT': 'polkadot'
 }
 
-# Frequent updates
-CRYPTO_MODULE_CONFIG['update_interval'] = 180  # 3 minutes
-CRYPTO_MODULE_CONFIG['display_duration'] = 8   # 8 seconds each
+# Enable market indicators
+FEAR_GREED_MODULE_CONFIG['enabled'] = True
+FEAR_GREED_MODULE_CONFIG['display_duration'] = 6
+BTC_DOMINANCE_MODULE_CONFIG['enabled'] = True
+BTC_DOMINANCE_MODULE_CONFIG['display_duration'] = 6
+ALT_SEASON_MODULE_CONFIG['enabled'] = True
+ALT_SEASON_MODULE_CONFIG['display_duration'] = 6
+MARKET_CAP_MODULE_CONFIG['enabled'] = True
+MARKET_CAP_MODULE_CONFIG['display_duration'] = 6
 
-MODULE_ORDER = ['crypto']
+# Show crypto multiple times with indicators in between
+MODULE_ORDER = ['crypto', 'crypto', 'fear_greed', 'crypto', 
+                'btc_dominance', 'crypto', 'alt_season', 
+                'crypto', 'market_cap']
 ```
 
-**Result:** 8 coins × 8 seconds = 64-second cycle, updates every 3 minutes
+**Result:**
+- Crypto: 5 screens × 6s = 30s
+- Fear & Greed: 1 screen × 6s = 6s
+- BTC Dominance: 1 screen × 6s = 6s
+- Altcoin Season: 2 screens × 6s = 12s
+- Market Cap: 1 screen × 6s = 6s
+- **Total:** 10 screens = 60-second cycle
 
 ---
 
@@ -789,38 +808,62 @@ CRYPTO_MODULE_CONFIG['update_interval'] = 120   # 2 minutes
 
 Formula: `Sum of (Module Screens × Display Duration)`
 
-**Example (Default Config):**
+**Current Modules Screen Count:**
+
+| Module | Screens | Notes |
+|--------|---------|-------|
+| Weather | 4 | Location, Temperature, Feels Like, Condition |
+| Crypto | Variable | 1 screen per cryptocurrency (default: 3 coins) |
+| Fear & Greed | 1 | Index value and classification |
+| BTC Dominance | 1 | Dominance percentage and status |
+| Altcoin Season | 2 | 7-day and 30-day indices |
+| Market Cap | 1 | Total market cap and 24h change |
+
+**Example Calculation (Default Config with all modules):**
 ```
-Weather: 4 screens × 10s = 40s
-Crypto:  3 coins   × 10s = 30s
-─────────────────────────────
-Total:   7 screens        = 70s
+MODULE_ORDER = ['weather', 'fear_greed', 'btc_dominance', 
+                'alt_season', 'market_cap'] + ['crypto'] * 3
+
+Display Duration = 5 seconds per screen (default for most modules)
+
+Weather:        4 screens × 5s = 20s
+Fear & Greed:   1 screen  × 5s =  5s
+BTC Dominance:  1 screen  × 5s =  5s
+Altcoin Season: 2 screens × 5s = 10s
+Market Cap:     1 screen  × 5s =  5s
+Crypto (×3):    3 screens × 5s = 15s
+─────────────────────────────────────
+Total:         12 screens      = 60s (1 minute cycle)
 ```
 
 ### Update vs Display
 
 **Update Interval:** How often data is fetched from APIs
-- Weather: Every 600s (10 minutes)
-- Crypto: Every 600s (10 minutes)
+
+| Module | Default Update Interval | API Calls per Day |
+|--------|------------------------|-------------------|
+| Weather | 600s (10 min) | 144 calls |
+| Crypto | 600s (10 min) | 144 calls |
+| Fear & Greed | 600s (10 min) | 144 calls |
+| BTC Dominance | 600s (10 min) | 144 calls |
+| Altcoin Season | 600s (10 min) | 144 calls |
+| Market Cap | 600s (10 min) | 144 calls |
 
 **Display Duration:** How long each screen shows
-- Default: 10 seconds per screen
+
+| Module | Default Duration | Screens | Total Time |
+|--------|-----------------|---------|------------|
+| Weather | 5s | 4 | 20s |
+| Crypto | 5s | Variable | 5s per coin |
+| Fear & Greed | 5s | 1 | 5s |
+| BTC Dominance | 5s | 1 | 5s |
+| Altcoin Season | 5s | 2 | 10s |
+| Market Cap | 5s | 1 | 5s |
 
 **Important:** Update interval is independent of display duration!
-
-### Example Scenarios
-
-**Fast Rotation (5s per screen, 3 cryptos):**
-```
-Total cycle: (3 + 1 + 3) × 5s = 35 seconds
-Updates: Every 10 minutes (unchanged)
-```
-
-**Slow Rotation (20s per screen, 5 cryptos):**
-```
-Total cycle: (3 + 1 + 5) × 20s = 180 seconds (3 minutes)
-Updates: Every 10 minutes (unchanged)
-```
+- Data is cached for the update_interval duration
+- Display cycles through screens continuously
+- Fresh data is fetched only when cache expires
 
 ---
 
