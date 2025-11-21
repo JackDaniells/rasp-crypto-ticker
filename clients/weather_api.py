@@ -1,7 +1,7 @@
 """Weather API Client - Handles HTTP requests to WeatherAPI"""
 
 import requests
-from .cache_utils import create_cache, cached_api_call, DEFAULT_CACHE_DURATION
+from utils.cache import create_cache, cached_api_call, DEFAULT_CACHE_DURATION
 
 
 # Internal cache

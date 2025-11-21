@@ -11,7 +11,7 @@ when calculating indices for multiple timeframes.
 
 import requests
 import time
-from .cache_utils import create_cache, cached_api_call, DEFAULT_CACHE_DURATION
+from utils.cache import create_cache, cached_api_call, DEFAULT_CACHE_DURATION
 
 
 # Internal cache

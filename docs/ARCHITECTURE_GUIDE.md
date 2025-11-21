@@ -86,15 +86,6 @@ rasp-crypto-ticker/
 │
 ├── 🔌 clients/                   ← API Client directory
 │   ├── __init__.py
-│   │
-│   ├── 🗃️  cache_utils.py         ← CENTRALIZED CACHING UTILITIES
-│   │   ├── DEFAULT_CACHE_DURATION (600 seconds)
-│   │   ├── create_cache()        → Creates standardized cache dict
-│   │   ├── cached_api_call()     → Generic cache wrapper for all APIs
-│   │   ├── is_cache_valid()      → Validates cache freshness
-│   │   ├── update_cache()        → Updates cache with new data
-│   │   └── get_cache_age()       → Returns cache age in seconds
-│   │
 │   ├── 🌡️  weather_api.py         ← Weather API client (with caching)
 │   ├── 💰 crypto_api.py           ← CoinGecko prices client (with caching)
 │   ├── 😨 fear_greed_api.py       ← Fear & Greed API client (with caching)
@@ -103,7 +94,19 @@ rasp-crypto-ticker/
 │   └── 🌐 ip_api.py               ← IP address client (no caching)
 │
 ├── 🛠️  utils/                     ← Utility directory
-│   ├── __init__.py               ← Utility functions (format_large_number)
+│   ├── __init__.py               ← Package initialization
+│   │
+│   ├── 📊 parser.py               ← DATA PARSING & FORMATTING
+│   │   └── format_large_number() → Formats numbers with K/M/B/T suffixes
+│   │
+│   ├── 🗃️  cache.py                ← CENTRALIZED CACHING UTILITIES
+│   │   ├── DEFAULT_CACHE_DURATION (600 seconds)
+│   │   ├── create_cache()        → Creates standardized cache dict
+│   │   ├── cached_api_call()     → Generic cache wrapper for all APIs
+│   │   ├── is_cache_valid()      → Validates cache freshness
+│   │   ├── update_cache()        → Updates cache with new data
+│   │   └── get_cache_age()       → Returns cache age in seconds
+│   │
 │   └── 📺 lcd_wrapper.py          ← LCD DISPLAY WRAPPER
 │       ├── SafeLCD class         → Automatic text validation & positioning
 │       ├── ROW_FIRST, ROW_SECOND → Row constants (0, 1)
@@ -134,7 +137,6 @@ rasp-crypto-ticker/
 | `modules/alt_season.py` | File | Altcoin Season module (7d + 30d, 2 screens) |
 | `modules/market_cap.py` | File | Total market cap display module |
 | `clients/` | Directory | API client functions for external APIs |
-| `clients/cache_utils.py` | File | Centralized caching utilities (DEFAULT_CACHE_DURATION, create_cache(), cached_api_call()) |
 | `clients/weather_api.py` | File | WeatherAPI client with caching |
 | `clients/crypto_api.py` | File | CoinGecko prices client with caching |
 | `clients/fear_greed_api.py` | File | Fear & Greed Index client with caching |
@@ -142,7 +144,9 @@ rasp-crypto-ticker/
 | `clients/altcoin_season_api.py` | File | Altcoin Season Index calculator (7d + 30d via CoinGecko) with caching |
 | `clients/ip_api.py` | File | IP address client (no caching needed) |
 | `utils/` | Directory | Utility functions and wrappers |
-| `utils/__init__.py` | File | Utility functions (format_large_number) |
+| `utils/__init__.py` | File | Package initialization |
+| `utils/parser.py` | File | Data parsing and formatting utilities (format_large_number) |
+| `utils/cache.py` | File | Centralized caching utilities (DEFAULT_CACHE_DURATION, create_cache(), cached_api_call()) |
 | `utils/lcd_wrapper.py` | File | LCD display wrapper (SafeLCD class, row/position constants) |
 | `docs/` | Directory | All project documentation |
 
@@ -190,7 +194,7 @@ temp = data.get('current', {}).get('temp_c', '--')  # Never crashes
 - Input: API parameters (keys, endpoints, timeout, cache_duration)
 - Output: Data dict or `None` (no exceptions, no error objects)
 - Responsibility: HTTP communication and caching
-- Caching: All clients use `cache_utils.py` for consistent caching behavior
+- Caching: All clients use `utils/cache.py` for consistent caching behavior
 
 **Module Functions:**
 - Input: Configuration from `config.py`
@@ -259,7 +263,7 @@ Module Creation
   └─→ display()
         └─→ Show data on LCD (1+ screens)
 
-Note: API clients handle caching internally using cache_utils.py
+Note: API clients handle caching internally using utils/cache.py
       Modules pass update_interval as cache_duration to API clients
 ```
 
@@ -359,11 +363,11 @@ config.py
 
 ### Centralized Caching System
 
-**Architecture**: All API clients use a centralized caching system via `cache_utils.py`
+**Architecture**: All API clients use a centralized caching system via `utils/cache.py`
 
 **Key Components**:
 ```python
-# cache_utils.py provides:
+# utils/cache.py provides:
 DEFAULT_CACHE_DURATION = 600  # 10 minutes (single source of truth)
 
 create_cache()           # Creates standardized cache structure
@@ -403,7 +407,7 @@ Module                     API Client                Cache Utils
 
 **API Client Implementation Pattern**:
 ```python
-from .cache_utils import create_cache, cached_api_call, DEFAULT_CACHE_DURATION
+from utils.cache import create_cache, cached_api_call, DEFAULT_CACHE_DURATION
 
 _cache = create_cache()  # Standardized cache structure
 
@@ -455,18 +459,18 @@ main.py
   ├─→ imports: clients.get_ip_address (for connection setup)
   └─→ imports: RPLCD, time
 
-clients/cache_utils.py
+utils/cache.py
   ├─→ exports: DEFAULT_CACHE_DURATION (600 seconds)
   ├─→ exports: create_cache() → creates standardized cache dict
   ├─→ exports: cached_api_call() → generic caching wrapper
   └─→ exports: Helper functions (is_cache_valid, update_cache, get_cache_age)
 
 clients/weather_api.py
-  ├─→ imports: requests, cache_utils
+  ├─→ imports: requests, utils.cache
   └─→ exports: get_weather(cache_duration=DEFAULT_CACHE_DURATION) → returns dict or None
 
 clients/crypto_api.py
-  ├─→ imports: requests, cache_utils
+  ├─→ imports: requests, utils.cache
   └─→ exports: get_crypto_prices(cache_duration=DEFAULT_CACHE_DURATION) → returns dict or None
 
 clients/ip_api.py
@@ -949,7 +953,7 @@ Balance information density with readability:
 ### 5. API Rate Limits
 Respect API rate limits:
 - Use appropriate `update_interval` (passed as `cache_duration` to API clients)
-- All API clients use centralized caching via `cache_utils.py`
+- All API clients use centralized caching via `utils/cache.py`
 - Caching is automatic - no manual cache management needed
 - Default cache duration: 600 seconds (10 minutes)
 

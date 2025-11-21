@@ -11,7 +11,7 @@ API Documentation: https://www.coingecko.com/api/documentation
 
 import requests
 import time
-from .cache_utils import create_cache, cached_api_call, DEFAULT_CACHE_DURATION
+from utils.cache import create_cache, cached_api_call, DEFAULT_CACHE_DURATION
 
 
 # Internal cache to avoid duplicate requests

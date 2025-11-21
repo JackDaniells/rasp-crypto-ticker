@@ -6,7 +6,7 @@ API Documentation: https://alternative.me/crypto/fear-and-greed-index/
 """
 
 import requests
-from .cache_utils import create_cache, cached_api_call, DEFAULT_CACHE_DURATION
+from utils.cache import create_cache, cached_api_call, DEFAULT_CACHE_DURATION
 
 
 # Internal cache
