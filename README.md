@@ -11,6 +11,7 @@ This project turns your Raspberry Pi into an always-on information display that 
 - **📊 Live Cryptocurrency Prices**: Track Bitcoin, Ethereum, Solana, or any cryptocurrency from CoinGecko API, displaying current price and 24-hour change percentage.
 - **🌡️ Real-Time Weather**: Automatically detects your location via IP and displays current temperature, feels-like temperature, and weather conditions using WeatherAPI.
 - **😨 Fear & Greed Index**: Market sentiment indicator showing current index value and classification (Extreme Fear to Extreme Greed).
+- **₿ Bitcoin Dominance**: Shows Bitcoin's market dominance percentage (% of total crypto market cap), with status classification (V.High/High/Moderate/Low/V.Low).
 - **🔄 Altcoin Season Index**: Shows what percentage of top 100 coins outperformed Bitcoin in the last 7 days and 30 days (displays two separate screens), determining if it's Altcoin Season (≥75%), Bitcoin Season (≤25%), or Mixed (25-75%).
 - **💎 Market Cap**: Total cryptocurrency market capitalization with 24h change percentage.
 - **🕐 Current Date & Time**: Shows the current date and time on each screen.
@@ -278,7 +279,7 @@ See **[CONFIGURATION_GUIDE.md](docs/CONFIGURATION_GUIDE.md)**
 
 ### Built-in Modules
 
-Five ready-to-use modules are included:
+Six ready-to-use modules are included:
 
 **🌡️ Weather & Time Module**
 - Displays: Temperature, Feels Like, Weather Condition
@@ -297,6 +298,13 @@ Five ready-to-use modules are included:
 - Classification: Extreme Fear, Fear, Neutral, Greed, Extreme Greed
 - Updates every 1 hour (configurable)
 - No API key required (Alternative.me public API)
+
+**₿ Bitcoin Dominance Module**
+- Displays: Bitcoin's percentage of total crypto market cap
+- Status classification: V.High (≥55%), High (≥50%), Moderate (≥45%), Low (≥40%), V.Low (<40%)
+- Updates every 10 minutes (configurable)
+- No API key required (CoinGecko public API)
+- Higher dominance often indicates BTC Season
 
 **🔄 Altcoin Season Module**
 - Displays: Percentage of top 100 coins outperforming Bitcoin (calculates 7d and 30d)
@@ -335,6 +343,14 @@ Five ready-to-use modules are included:
 ┌────────────────┐
 │14:30  F&G Index│ ← Current time + Title
 │   68: Greed    │ ← Index value + Classification
+└────────────────┘
+```
+
+**Bitcoin Dominance Module:**
+```
+┌────────────────┐
+│ BTC Dominance  │ ← Title (centered)
+│56.58% - V.High │ ← Dominance % + Status (centered)
 └────────────────┘
 ```
 

@@ -444,7 +444,72 @@ Screen 2 (30-day):
 
 ---
 
-### 6. Market Cap Module Configuration
+### 6. Bitcoin Dominance Module Configuration
+
+```python
+BTC_DOMINANCE_MODULE_CONFIG = {
+    'enabled': True,
+    'update_interval': 600,   # 10 minutes
+    'display_duration': 5,    # seconds
+    'timeout': 10,
+    'max_failed_attempts': 3
+}
+```
+
+**Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `enabled` | bool | `True` | Enable/disable BTC Dominance module |
+| `update_interval` | int | `600` | Seconds between API updates (10 min) |
+| `display_duration` | int | `5` | Seconds to display on screen |
+| `timeout` | int | `10` | API request timeout (seconds) |
+| `max_failed_attempts` | int | `3` | API failures before showing error |
+
+**Display Format:**
+```
+ BTC Dominance
+56.58% - V.High
+```
+
+**Status Classifications:**
+- **V.High**: 55% or higher (Strong Bitcoin dominance)
+- **High**: 50-54.9% (Bitcoin dominance)
+- **Moderate**: 45-49.9% (Balanced market)
+- **Low**: 40-44.9% (Altcoin-friendly)
+- **V.Low**: Below 40% (Strong altcoin environment)
+
+**What it shows:**
+- **Top line**: "BTC Dominance" title (centered)
+- **Bottom line**: Dominance percentage and status (centered)
+- **Dominance**: What percentage of total crypto market cap is Bitcoin
+
+**Implementation Details:**
+- **Source**: CoinGecko Global API (shared with Market Cap module)
+- **Calculation**: (Bitcoin Market Cap / Total Crypto Market Cap) × 100
+- **API Efficiency**: Single API call serves both Market Cap and BTC Dominance modules
+- **Caching**: Results cached for 60 seconds to prevent duplicate requests
+- **No API key required** (uses CoinGecko free tier)
+- **Updates**: Every 10 minutes (configurable)
+- **Time**: Instant (single cached API call)
+- **Rate limit**: Reduced consumption due to caching (10-50 calls/minute shared)
+
+**Market Interpretation:**
+- **>55% (Very High)**: Bitcoin Season - BTC outperforming altcoins
+- **50-55% (High)**: BTC dominant - safer to hold Bitcoin
+- **45-50% (Moderate)**: Balanced market - diversification recommended
+- **40-45% (Low)**: Altcoin-friendly - good for alt positions
+- **<40% (Very Low)**: Altcoin Season - alts outperforming BTC significantly
+
+**Use Cases:**
+- **Market sentiment**: Higher dominance = risk-off, lower = risk-on
+- **Trading strategy**: High dominance = focus on BTC, low = explore altcoins
+- **Risk management**: Complements Altcoin Season index for market timing
+- **Portfolio allocation**: Helps decide BTC vs altcoin weight
+
+---
+
+### 7. Market Cap Module Configuration
 
 ```python
 MARKET_CAP_MODULE_CONFIG = {

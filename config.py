@@ -89,6 +89,20 @@ ALT_SEASON_MODULE_CONFIG = {
 }
 
 # ============================================================================
+# BTC DOMINANCE MODULE CONFIGURATION
+# ============================================================================
+# Displays Bitcoin Dominance: % of total crypto market cap that is Bitcoin
+# Fetched from CoinGecko Global API (free, no API key required)
+# Higher dominance (>50%) = BTC Season, Lower (<40%) = Alt-friendly environment
+BTC_DOMINANCE_MODULE_CONFIG = {
+    'enabled': True,
+    'update_interval': 600,   # 10 minutes
+    'display_duration': 5,   # seconds
+    'timeout': 10,
+    'max_failed_attempts': 3
+}
+
+# ============================================================================
 # APPLICATION CONFIGURATION
 # ============================================================================
 APP_CONFIG = {
@@ -100,7 +114,7 @@ APP_CONFIG = {
 # ============================================================================
 # MODULE DISPLAY ORDER
 # ============================================================================
-MODULE_ORDER = ['weather', 'fear_greed', 'alt_season', 'market_cap'] + ['crypto'] * 3
+MODULE_ORDER = ['weather', 'fear_greed', 'btc_dominance', 'alt_season', 'market_cap'] + ['crypto'] * 3
 
 # ============================================================================
 # QUICK REFERENCE

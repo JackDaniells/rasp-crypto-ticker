@@ -65,6 +65,12 @@ rasp-crypto-ticker/
 │   │       ├── fetch_data()      → Alternative.me API
 │   │       └── display()         → 1 screen (index + classification)
 │   │
+│   ├── ₿ btc_dominance.py         ← BTC DOMINANCE MODULE
+│   │   └── BtcDominanceModule(BaseModule)
+│   │       ├── fetch_data()      → CoinGecko Global API
+│   │       ├── display()         → 1 screen (dominance % + status)
+│   │       └── _get_status()     → Determines classification from dominance
+│   │
 │   ├── 🔄 alt_season.py           ← ALTCOIN SEASON MODULE
 │   │   └── AltSeasonModule(BaseModule)
 │   │       ├── fetch_data()      → CoinGecko API (calculated)
@@ -99,14 +105,15 @@ rasp-crypto-ticker/
 | `modules/weather.py` | File | Weather and time display module |
 | `modules/crypto.py` | File | Cryptocurrency price display module |
 | `modules/fear_greed.py` | File | Fear & Greed Index display module |
+| `modules/btc_dominance.py` | File | Bitcoin Dominance module (BTC % of total market cap) |
 | `modules/alt_season.py` | File | Altcoin Season module (7d + 30d, 2 screens) |
 | `modules/market_cap.py` | File | Total market cap display module |
 | `clients/` | Directory | API client functions for external APIs |
 | `clients/weather_api.py` | File | WeatherAPI client |
 | `clients/crypto_api.py` | File | CoinGecko prices client |
 | `clients/fear_greed_api.py` | File | Fear & Greed Index client |
+| `clients/coingecko_global_api.py` | File | CoinGecko Global API with caching (market cap, BTC dominance, etc) |
 | `clients/altcoin_season_api.py` | File | Altcoin Season Index calculator (7d + 30d via CoinGecko) |
-| `clients/market_cap_api.py` | File | Global market cap client |
 | `clients/ip_api.py` | File | IP address client |
 | `docs/` | Directory | All project documentation |
 

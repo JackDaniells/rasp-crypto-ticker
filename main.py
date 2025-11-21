@@ -10,6 +10,7 @@ from config import (
     FEAR_GREED_MODULE_CONFIG,
     MARKET_CAP_MODULE_CONFIG,
     ALT_SEASON_MODULE_CONFIG,
+    BTC_DOMINANCE_MODULE_CONFIG,
     APP_CONFIG,
     MODULE_ORDER
 )
@@ -18,6 +19,7 @@ from modules.crypto import CryptoModule
 from modules.fear_greed import FearGreedModule
 from modules.market_cap import MarketCapModule
 from modules.alt_season import AltSeasonModule
+from modules.btc_dominance import BtcDominanceModule
 from clients import get_ip_address
 
 
@@ -104,6 +106,11 @@ def initialize_modules(lcd, ip):
     if MARKET_CAP_MODULE_CONFIG['enabled']:
         modules['market_cap'] = MarketCapModule(lcd, MARKET_CAP_MODULE_CONFIG)
         print("Market Cap module initialized")
+    
+    # Initialize Bitcoin Dominance Module
+    if BTC_DOMINANCE_MODULE_CONFIG['enabled']:
+        modules['btc_dominance'] = BtcDominanceModule(lcd, BTC_DOMINANCE_MODULE_CONFIG)
+        print("BTC Dominance module initialized")
     
     # Initialize Altcoin Season Module
     if ALT_SEASON_MODULE_CONFIG['enabled']:

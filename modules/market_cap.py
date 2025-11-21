@@ -8,7 +8,7 @@ Shows total market cap and 24h change percentage
 import time
 from datetime import datetime
 from modules.base import BaseModule
-from clients import get_global_market_cap
+from clients import get_global_data
 from utils import format_large_number
 
 
@@ -33,7 +33,7 @@ class MarketCapModule(BaseModule):
         
     def fetch_data(self):
         """Fetch global market cap data"""
-        return get_global_market_cap(timeout=self.timeout)
+        return get_global_data(timeout=self.timeout)
     
     def _format_market_cap(self, value):
         """Format market cap value to readable string (e.g., 1.2T, 450B)"""
