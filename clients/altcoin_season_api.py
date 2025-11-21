@@ -11,6 +11,11 @@ when calculating indices for multiple timeframes.
 
 import requests
 import time
+from .cache_utils import create_cache, cached_api_call, DEFAULT_CACHE_DURATION
+
+
+# Internal cache
+_cache = create_cache()
 
 
 def _calculate_index(altcoins, btc_performance, performance_key, timeframe_label):
@@ -47,14 +52,19 @@ def _calculate_index(altcoins, btc_performance, performance_key, timeframe_label
     return index_value
 
 
-def get_altcoin_season_index(timeout=10):
-    """Calculate Altcoin Season Index using CoinGecko API for both 7d and 30d
+def get_altcoin_season_index(timeout=10, cache_duration=DEFAULT_CACHE_DURATION, force_refresh=False):
+    """Calculate Altcoin Season Index using CoinGecko API for both 7d and 30d with caching
     
     The index calculates the percentage of top 100 altcoins that outperformed 
     Bitcoin over the last 7 days and 30 days. Based on this percentage:
     - 75% or more = Altcoin Season
     - 25% or less = Bitcoin Season
     - Between 25-75% = Mixed/Neutral
+    
+    Args:
+        timeout: Request timeout in seconds
+        cache_duration: Cache duration in seconds (default: 600 = 10 minutes)
+        force_refresh: If True, bypasses cache
     
     Returns:
         dict: Altcoin Season data if successful, None otherwise
@@ -65,83 +75,97 @@ def get_altcoin_season_index(timeout=10):
             'timestamp': 1640000000
         }
     """
-    url = "https://api.coingecko.com/api/v3/coins/markets"
-    
-    try:
-        # Fetch top 110 coins with both 24h and 30d price change data
-        params = {
-            'vs_currency': 'usd',
-            'order': 'market_cap_desc',
-            'per_page': 110,  # Fetch extra to ensure 100 altcoins with data
-            'page': 1,
-            'sparkline': False,
-            'price_change_percentage': '7d,30d'
-        }
+    # Define fetch function
+    def fetch():
+        url = "https://api.coingecko.com/api/v3/coins/markets"
         
-        response = requests.get(url, params=params, timeout=timeout)
-        
-        if response.status_code != 200:
-            print(f"Altcoin Season API error: CoinGecko returned status code {response.status_code}")
-            return None
-        
-        data = response.json()
-        
-        if not data or len(data) < 2:
-            print("Altcoin Season: Insufficient data from CoinGecko")
-            return None
-        
-        # Find Bitcoin's performance and collect altcoins for both timeframes
-        btc_performance_7d = None
-        btc_performance_30d = None
-        altcoins = []
-        
-        for coin in data:
-            coin_id = coin.get('id', '').lower()
-            price_change_7d = coin.get('price_change_percentage_7d_in_currency')
-            price_change_30d = coin.get('price_change_percentage_30d_in_currency')
+        try:
+            # Fetch top 110 coins with both 7d and 30d price change data
+            params = {
+                'vs_currency': 'usd',
+                'order': 'market_cap_desc',
+                'per_page': 110,  # Fetch extra to ensure 100 altcoins with data
+                'page': 1,
+                'sparkline': False,
+                'price_change_percentage': '7d,30d'
+            }
             
-            # Skip if both values are missing
-            if price_change_7d is None and price_change_30d is None:
-                continue
+            response = requests.get(url, params=params, timeout=timeout)
+            
+            if response.status_code != 200:
+                print(f"Altcoin Season API error: CoinGecko returned status code {response.status_code}")
+                return None
+            
+            data = response.json()
+            
+            if not data or len(data) < 2:
+                print("Altcoin Season: Insufficient data from CoinGecko")
+                return None
+            
+            # Find Bitcoin's performance and collect altcoins for both timeframes
+            btc_performance_7d = None
+            btc_performance_30d = None
+            altcoins = []
+            
+            for coin in data:
+                coin_id = coin.get('id', '').lower()
+                price_change_7d = coin.get('price_change_percentage_7d_in_currency')
+                price_change_30d = coin.get('price_change_percentage_30d_in_currency')
                 
-            if coin_id == 'bitcoin':
-                btc_performance_7d = price_change_7d
-                btc_performance_30d = price_change_30d
-            else:
-                altcoins.append({
-                    'id': coin.get('id'),
-                    'symbol': coin.get('symbol'),
-                    'performance_7d': price_change_7d,
-                    'performance_30d': price_change_30d
-                })
-        
-        if btc_performance_7d is None and btc_performance_30d is None:
-            print("Altcoin Season: Bitcoin data not found")
+                # Skip if both values are missing
+                if price_change_7d is None and price_change_30d is None:
+                    continue
+                    
+                if coin_id == 'bitcoin':
+                    btc_performance_7d = price_change_7d
+                    btc_performance_30d = price_change_30d
+                else:
+                    altcoins.append({
+                        'id': coin.get('id'),
+                        'symbol': coin.get('symbol'),
+                        'performance_7d': price_change_7d,
+                        'performance_30d': price_change_30d
+                    })
+            
+            if btc_performance_7d is None and btc_performance_30d is None:
+                print("Altcoin Season: Bitcoin data not found")
+                return None
+            
+            # Take only the first 100 altcoins (they're already ordered by market cap)
+            altcoins = altcoins[:100]
+            
+            if len(altcoins) < 100:
+                print(f"Altcoin Season: Only {len(altcoins)} altcoins with data (target: 100)")
+            
+            # Calculate 7d index
+            index_7d = _calculate_index(altcoins, btc_performance_7d, 'performance_7d', '7d')
+            
+            # Calculate 30d index
+            index_30d = _calculate_index(altcoins, btc_performance_30d, 'performance_30d', '30d')
+            
+            if index_7d is None and index_30d is None:
+                print("Altcoin Season: Failed to calculate any index")
+                return None
+            
+            result = {
+                'value_7d': index_7d,
+                'value_30d': index_30d,
+                'timestamp': int(time.time())
+            }
+            
+            print("- Indices calculated")
+            return result
+            
+        except Exception as e:
+            print(f"Error calculating altcoin season index: {e}")
             return None
-        
-        # Take only the first 100 altcoins (they're already ordered by market cap)
-        altcoins = altcoins[:100]
-        
-        if len(altcoins) < 100:
-            print(f"Altcoin Season: Only {len(altcoins)} altcoins with data (target: 100)")
-        
-        # Calculate 7d index
-        index_7d = _calculate_index(altcoins, btc_performance_7d, 'performance_7d', '7d')
-        
-        # Calculate 30d index
-        index_30d = _calculate_index(altcoins, btc_performance_30d, 'performance_30d', '30d')
-        
-        if index_7d is None and index_30d is None:
-            print("Altcoin Season: Failed to calculate any index")
-            return None
-        
-        return {
-            'value_7d': index_7d,
-            'value_30d': index_30d,
-            'timestamp': int(time.time())
-        }
-        
-    except Exception as e:
-        print(f"Error calculating altcoin season index: {e}")
-        return None
+    
+    # Use centralized caching
+    return cached_api_call(
+        cache=_cache,
+        fetch_function=fetch,
+        cache_duration=cache_duration,
+        force_refresh=force_refresh,
+        api_name="Altcoin Season API"
+    )
 

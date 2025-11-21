@@ -42,7 +42,7 @@ rasp-crypto-ticker/
 │   │   └── BaseModule (Abstract)
 │   │       ├── fetch_data()      [abstract]
 │   │       ├── display()         [abstract]
-│   │       ├── should_update_data()
+│   │       ├── is_data_ready()
 │   │       ├── update_data()
 │   │       ├── is_enabled()
 │   │       └── get_display_count()
@@ -84,6 +84,24 @@ rasp-crypto-ticker/
 │           ├── display()         → 1 screen (total cap + 24h change)
 │           └── _format_market_cap()
 │
+├── 🔌 clients/                   ← API Client directory
+│   ├── __init__.py
+│   │
+│   ├── 🗃️  cache_utils.py         ← CENTRALIZED CACHING UTILITIES
+│   │   ├── DEFAULT_CACHE_DURATION (600 seconds)
+│   │   ├── create_cache()        → Creates standardized cache dict
+│   │   ├── cached_api_call()     → Generic cache wrapper for all APIs
+│   │   ├── is_cache_valid()      → Validates cache freshness
+│   │   ├── update_cache()        → Updates cache with new data
+│   │   └── get_cache_age()       → Returns cache age in seconds
+│   │
+│   ├── 🌡️  weather_api.py         ← Weather API client (with caching)
+│   ├── 💰 crypto_api.py           ← CoinGecko prices client (with caching)
+│   ├── 😨 fear_greed_api.py       ← Fear & Greed API client (with caching)
+│   ├── 🌍 coingecko_global_api.py ← Global market data client (with caching)
+│   ├── 🔄 altcoin_season_api.py   ← Altcoin Season calculator (with caching)
+│   └── 🌐 ip_api.py               ← IP address client (no caching)
+│
 └── 📚 docs/                      ← Documentation
     ├── ARCHITECTURE_GUIDE.md     ← This file
     ├── I2C_SETUP.md              ← I2C setup guide
@@ -109,12 +127,15 @@ rasp-crypto-ticker/
 | `modules/alt_season.py` | File | Altcoin Season module (7d + 30d, 2 screens) |
 | `modules/market_cap.py` | File | Total market cap display module |
 | `clients/` | Directory | API client functions for external APIs |
-| `clients/weather_api.py` | File | WeatherAPI client |
-| `clients/crypto_api.py` | File | CoinGecko prices client |
-| `clients/fear_greed_api.py` | File | Fear & Greed Index client |
+| `clients/cache_utils.py` | File | Centralized caching utilities (DEFAULT_CACHE_DURATION, create_cache(), cached_api_call()) |
+| `clients/weather_api.py` | File | WeatherAPI client with caching |
+| `clients/crypto_api.py` | File | CoinGecko prices client with caching |
+| `clients/fear_greed_api.py` | File | Fear & Greed Index client with caching |
 | `clients/coingecko_global_api.py` | File | CoinGecko Global API with caching (market cap, BTC dominance, etc) |
-| `clients/altcoin_season_api.py` | File | Altcoin Season Index calculator (7d + 30d via CoinGecko) |
-| `clients/ip_api.py` | File | IP address client |
+| `clients/altcoin_season_api.py` | File | Altcoin Season Index calculator (7d + 30d via CoinGecko) with caching |
+| `clients/ip_api.py` | File | IP address client (no caching needed) |
+| `utils/` | Directory | Utility functions |
+| `utils/__init__.py` | File | Utility functions (format_large_number) |
 | `docs/` | Directory | All project documentation |
 
 ---
@@ -129,7 +150,7 @@ This project follows a **clean, pragmatic architecture** focused on simplicity a
 
 **Two-Layer Architecture:**
 ```
-clients/     → API Communication Layer (HTTP requests only)
+clients/     → API Communication Layer (HTTP requests + caching)
 modules/     → Display Layer (presentation logic only)
 ```
 
@@ -137,6 +158,7 @@ modules/     → Display Layer (presentation logic only)
 - Easy to test (mock clients for unit tests)
 - Easy to debug (network issues vs. display issues)
 - Easy to extend (new APIs don't affect display code)
+- Centralized caching (consistent behavior across all APIs)
 
 #### 2. **Fail-Safe by Design**
 
@@ -157,9 +179,10 @@ temp = data.get('current', {}).get('temp_c', '--')  # Never crashes
 #### 3. **Simple Contracts**
 
 **Client Functions:**
-- Input: API parameters (keys, endpoints, timeout)
+- Input: API parameters (keys, endpoints, timeout, cache_duration)
 - Output: Data dict or `None` (no exceptions, no error objects)
-- Responsibility: HTTP communication only
+- Responsibility: HTTP communication and caching
+- Caching: All clients use `cache_utils.py` for consistent caching behavior
 
 **Module Functions:**
 - Input: Configuration from `config.py`
@@ -213,22 +236,23 @@ Module Creation
   │
   ├─→ __init__(lcd, config)
   │     ├─→ Store LCD reference
-  │     ├─→ Store config settings
-  │     └─→ Initialize last_update = 0
+  │     ├─→ Store config settings (including update_interval)
+  │     └─→ Initialize data = {}
   │
-  ├─→ should_update_data()
-  │     └─→ Check if (now - last_update) > update_interval
+  ├─→ is_data_ready()
+  │     ├─→ Check if self.data exists
+  │     └─→ Call update_data() if needed
   │
   ├─→ update_data()
-  │     ├─→ if should_update_data():
-  │     │     ├─→ fetch_data()        # API call
-  │     │     ├─→ Store data
-  │     │     └─→ Update last_update
-  │     │
-  │     └─→ else: skip (use cached data)
+  │     ├─→ fetch_data()              # API call (with caching handled by client)
+  │     ├─→ Handle errors gracefully
+  │     └─→ Store data or keep previous good data
   │
   └─→ display()
         └─→ Show data on LCD (1+ screens)
+
+Note: API clients handle caching internally using cache_utils.py
+      Modules pass update_interval as cache_duration to API clients
 ```
 
 **3. Configuration Flow**
@@ -274,6 +298,80 @@ config.py
 - No hardcoded values
 - Easy to customize
 
+### Centralized Caching System
+
+**Architecture**: All API clients use a centralized caching system via `cache_utils.py`
+
+**Key Components**:
+```python
+# cache_utils.py provides:
+DEFAULT_CACHE_DURATION = 600  # 10 minutes (single source of truth)
+
+create_cache()           # Creates standardized cache structure
+cached_api_call()       # Generic wrapper for any API call
+is_cache_valid()        # Validates cache freshness
+update_cache()          # Updates cache with new data
+get_cache_age()         # Returns cache age in seconds
+```
+
+**How It Works**:
+```
+Module                     API Client                Cache Utils
+  │                            │                          │
+  ├─ fetch_data()              │                          │
+  │    └──────────────────────>│                          │
+  │      (passes update_       │                          │
+  │       interval as          │                          │
+  │       cache_duration)      │                          │
+  │                            │                          │
+  │                            ├─ cached_api_call()       │
+  │                            │    └───────────────────> │
+  │                            │      (checks cache)      │
+  │                            │                          │
+  │                            │<─────────────────────────┤
+  │                            │   (returns cached or     │
+  │                            │    fetches fresh data)   │
+  │<───────────────────────────┤                          │
+  │    (receives data)         │                          │
+```
+
+**Benefits**:
+- **Zero Duplication**: Cache logic exists in one place
+- **Consistency**: All APIs cache data identically
+- **Single Source of Truth**: `DEFAULT_CACHE_DURATION` defined once
+- **Easy to Modify**: Change cache behavior for all APIs in one file
+- **Testability**: Cache utilities can be unit tested independently
+
+**API Client Implementation Pattern**:
+```python
+from .cache_utils import create_cache, cached_api_call, DEFAULT_CACHE_DURATION
+
+_cache = create_cache()  # Standardized cache structure
+
+def get_data(timeout=10, cache_duration=DEFAULT_CACHE_DURATION, force_refresh=False):
+    def fetch():
+        # API-specific fetch logic here
+        return data
+    
+    return cached_api_call(
+        cache=_cache,
+        fetch_function=fetch,
+        cache_duration=cache_duration,
+        force_refresh=force_refresh,
+        api_name="API Name"
+    )
+```
+
+**Module Implementation**:
+```python
+def fetch_data(self):
+    """Fetch data from API (caching handled automatically)"""
+    return get_api_data(
+        timeout=self.timeout,
+        cache_duration=self.update_interval  # Pass module's update interval
+    )
+```
+
 ### Key Design Patterns
 
 **1. Template Method Pattern**  
@@ -298,17 +396,23 @@ main.py
   ├─→ imports: clients.get_ip_address (for connection setup)
   └─→ imports: RPLCD, time
 
+clients/cache_utils.py
+  ├─→ exports: DEFAULT_CACHE_DURATION (600 seconds)
+  ├─→ exports: create_cache() → creates standardized cache dict
+  ├─→ exports: cached_api_call() → generic caching wrapper
+  └─→ exports: Helper functions (is_cache_valid, update_cache, get_cache_age)
+
 clients/weather_api.py
-  ├─→ imports: requests
-  └─→ exports: get_weather() → returns dict or None
+  ├─→ imports: requests, cache_utils
+  └─→ exports: get_weather(cache_duration=DEFAULT_CACHE_DURATION) → returns dict or None
 
 clients/crypto_api.py
-  ├─→ imports: requests
-  └─→ exports: get_crypto_prices() → returns dict or None
+  ├─→ imports: requests, cache_utils
+  └─→ exports: get_crypto_prices(cache_duration=DEFAULT_CACHE_DURATION) → returns dict or None
 
 clients/ip_api.py
   ├─→ imports: requests
-  └─→ exports: get_ip_address() → returns str or None
+  └─→ exports: get_ip_address() → returns str or None (no caching)
 
 modules/weather.py
   ├─→ imports: modules.base (BaseModule)
@@ -346,7 +450,7 @@ config.py
                 │ Provides common interface:
                 │ - fetch_data() [abstract]
                 │ - display() [abstract]
-                │ - should_update_data()
+                │ - is_data_ready()
                 │ - update_data()
                 │ - is_enabled()
                 │ - get_display_count()
@@ -370,8 +474,8 @@ WeatherModule     CryptoModule
 - `display()` - Show data on LCD
 
 **Concrete Methods** (provided by base class):
-- `should_update_data()` - Checks if data needs updating based on interval
-- `update_data()` - Fetches and stores new data
+- `is_data_ready()` - Checks if data is available, fetches if needed
+- `update_data()` - Fetches and stores new data (with error handling)
 - `is_enabled()` - Returns if module is enabled
 - `get_display_count()` - Returns number of screens (default 1)
 
@@ -381,9 +485,9 @@ WeatherModule     CryptoModule
 - `self.config` - Configuration dictionary
 - `self.enabled` - Enabled status
 - `self.display_duration` - Seconds per screen
-- `self.update_interval` - Seconds between updates
-- `self.data` - Cached data
-- `self.last_update` - Timestamp of last update
+- `self.update_interval` - Seconds between updates (passed to API clients for caching)
+- `self.data` - Current module data
+- `self.consecutive_failures` - Count of consecutive API failures
 
 ---
 
@@ -590,10 +694,16 @@ def get_display_count(self):
     """Return number of screens this module displays"""
     return len(self.symbols)
 
-def should_update_data(self):
-    """Custom update logic (optional)"""
-    # Use default from base class, or implement custom logic
-    return super().should_update_data()
+def fetch_data(self):
+    """Fetch data from API"""
+    # API clients handle caching internally
+    # Pass update_interval as cache_duration for consistency
+    return get_stock_prices(
+        symbols=self.symbols,
+        api_key=self.api_key,
+        timeout=self.timeout,
+        cache_duration=self.update_interval  # Pass to API client
+    )
 ```
 
 #### Step 4: Add Configuration
@@ -776,9 +886,10 @@ Balance information density with readability:
 
 ### 5. API Rate Limits
 Respect API rate limits:
-- Use appropriate `update_interval`
-- Cache data when possible
-- Handle rate limit errors gracefully
+- Use appropriate `update_interval` (passed as `cache_duration` to API clients)
+- All API clients use centralized caching via `cache_utils.py`
+- Caching is automatic - no manual cache management needed
+- Default cache duration: 600 seconds (10 minutes)
 
 ### 6. Configuration
 Make everything configurable:
@@ -842,14 +953,16 @@ class NewsModule(BaseModule):
 
 ```python
 class CustomUpdateModule(BaseModule):
-    """Module with custom update timing"""
+    """Module with conditional data fetching"""
     
-    def should_update_data(self):
-        # Update only during business hours
+    def fetch_data(self):
+        # Only fetch during business hours
         now = datetime.now()
         if 9 <= now.hour <= 17:  # 9 AM to 5 PM
-            return super().should_update_data()
-        return False
+            return get_stock_data(
+                cache_duration=self.update_interval
+            )
+        return None  # Skip fetching outside business hours
 ```
 
 ---
@@ -864,9 +977,9 @@ class CustomUpdateModule(BaseModule):
 2. Main loop begins
    └─> For each module in MODULE_ORDER:
        ├─> module.update_data()
-       │   └─> if should_update_data():
-       │       └─> fetch_data()
-       │           └─> Updates self.data
+       │   └─> fetch_data()
+       │       ├─> API client checks internal cache
+       │       └─> Updates self.data (if valid)
        │
        └─> module.display()
            └─> Shows data on LCD

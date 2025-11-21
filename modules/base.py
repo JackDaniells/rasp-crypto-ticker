@@ -27,10 +27,9 @@ class BaseModule(ABC):
             raise ValueError(f"{name} module missing required config keys: {', '.join(missing_keys)}. Check config.py")
         
         self.enabled = config['enabled']
-        self.update_interval = config['update_interval']  # seconds
+        self.update_interval = config['update_interval']  # seconds (passed to API clients for caching)
         self.display_duration = config['display_duration']  # seconds
         self.max_failed_attempts = config['max_failed_attempts']
-        self.last_update = 0
         self.data = {}
         self.consecutive_failures = 0
     
@@ -51,11 +50,6 @@ class BaseModule(ABC):
         """
         return data is None or data == {}
     
-    def should_update_data(self):
-        """Check if data should be updated based on interval"""
-        current_time = datetime.now().timestamp()
-        return (current_time - self.last_update) >= self.update_interval
-    
     def is_data_ready(self):
         """
         Check if data is ready for display, updating if necessary
@@ -71,32 +65,29 @@ class BaseModule(ABC):
     
     def update_data(self):
         """
-        Update module data and timestamp
+        Update module data
         
         Keeps last good data on API failure until max_failed_attempts is reached
         """
-        if self.should_update_data():
-            new_data = self.fetch_data()
+        new_data = self.fetch_data()
+        
+        # Check if new data is valid or error
+        if self.is_error_data(new_data):
+            self.consecutive_failures += 1
+            print(f"{self.name} module: API failure {self.consecutive_failures}/{self.max_failed_attempts}")
             
-            # Check if new data is valid or error
-            if self.is_error_data(new_data):
-                self.consecutive_failures += 1
-                print(f"{self.name} module: API failure {self.consecutive_failures}/{self.max_failed_attempts}")
-                
-                # Only replace good data with error after max failures
-                if self.consecutive_failures >= self.max_failed_attempts:
-                    print(f"{self.name} module: Max failures reached, showing error")
-                    self.data = new_data
-                else:
-                    print(f"{self.name} module: Keeping previous data")
-                    # Keep self.data as-is (previous good data)
-            else:
-                # Success! Reset failure counter and update data
-                self.consecutive_failures = 0
+            # Only replace good data with error after max failures
+            if self.consecutive_failures >= self.max_failed_attempts:
+                print(f"{self.name} module: Max failures reached, showing error")
                 self.data = new_data
-                print(f"{self.name} module: Data updated successfully")
-            
-            self.last_update = datetime.now().timestamp()
+            else:
+                print(f"{self.name} module: Keeping previous data")
+                # Keep self.data as-is (previous good data)
+        else:
+            # Success! Reset failure counter and update data
+            self.consecutive_failures = 0
+            self.data = new_data
+            print(f"{self.name} module: Data updated successfully")
     
     def is_enabled(self):
         """Check if module is enabled"""

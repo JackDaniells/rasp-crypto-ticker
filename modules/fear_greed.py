@@ -31,7 +31,7 @@ class FearGreedModule(BaseModule):
         
     def fetch_data(self):
         """Fetch Fear and Greed Index data"""
-        return get_fear_greed_index(timeout=self.timeout)
+        return get_fear_greed_index(timeout=self.timeout, cache_duration=self.update_interval)
     
     def _shorten_classification(self, classification):
         """Shorten two-word classifications (e.g., 'Extreme Fear' -> 'Extr. Fear')"""

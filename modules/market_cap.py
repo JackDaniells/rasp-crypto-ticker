@@ -33,7 +33,7 @@ class MarketCapModule(BaseModule):
         
     def fetch_data(self):
         """Fetch global market cap data"""
-        return get_global_data(timeout=self.timeout)
+        return get_global_data(timeout=self.timeout, cache_duration=self.update_interval)
     
     def _format_market_cap(self, value):
         """Format market cap value to readable string (e.g., 1.2T, 450B)"""

@@ -39,7 +39,7 @@ class AltSeasonModule(BaseModule):
         
     def fetch_data(self):
         """Fetch Altcoin Season Index data"""
-        return get_altcoin_season_index(timeout=self.timeout)
+        return get_altcoin_season_index(timeout=self.timeout, cache_duration=self.update_interval)
     
     def _get_season(self, index_value):
         """

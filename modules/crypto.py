@@ -32,7 +32,8 @@ class CryptoModule(BaseModule):
         data = get_crypto_prices(
             coingecko_ids=coingecko_ids,
             fiat_currency=self.fiat,
-            timeout=self.timeout
+            timeout=self.timeout,
+            cache_duration=self.update_interval
         )
         
         return data

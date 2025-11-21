@@ -23,7 +23,7 @@ class BtcDominanceModule(BaseModule):
     
     def fetch_data(self):
         """Fetch Bitcoin dominance from CoinGecko API"""
-        data = get_global_data(timeout=self.timeout)
+        data = get_global_data(timeout=self.timeout, cache_duration=self.update_interval)
         
         if data is None:
             return None

@@ -29,7 +29,8 @@ class WeatherModule(BaseModule):
         data = get_weather(
             api_key=self.api_key,
             location=self.ip,
-            timeout=self.timeout
+            timeout=self.timeout,
+            cache_duration=self.update_interval
         )
         
         return data
