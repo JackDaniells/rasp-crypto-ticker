@@ -88,27 +88,27 @@ rasp-crypto-ticker/
 
 ### File and Directory Purpose
 
-| Path | Type | Purpose | Lines |
-|------|------|---------|-------|
-| `main.py` | File | Application entry point, initializes LCD, modules, and main loop | ~150 |
-| `config.py` | File | Centralized configuration for all modules and app settings | ~200 |
-| `launcher.sh` | File | Shell script for launching the application (used by systemd) | ~20 |
-| `requirements.txt` | File | Python package dependencies | ~5 |
-| `modules/` | Directory | Contains all display modules | - |
-| `modules/base.py` | File | Abstract base class for all modules | ~96 |
-| `modules/weather.py` | File | Weather and time display module | ~86 |
-| `modules/crypto.py` | File | Cryptocurrency price display module | ~85 |
-| `modules/fear_greed.py` | File | Fear & Greed Index display module | ~67 |
-| `modules/alt_season.py` | File | Altcoin Season module (7d + 30d, 2 screens) | ~110 |
-| `modules/market_cap.py` | File | Total market cap display module | ~106 |
-| `clients/` | Directory | API client functions for external APIs | - |
-| `clients/weather_api.py` | File | WeatherAPI client | ~39 |
-| `clients/crypto_api.py` | File | CoinGecko prices client | ~45 |
-| `clients/fear_greed_api.py` | File | Fear & Greed Index client | ~40 |
-| `clients/altcoin_season_api.py` | File | Altcoin Season Index calculator (7d + 30d via CoinGecko) | ~147 |
-| `clients/market_cap_api.py` | File | Global market cap client | ~40 |
-| `clients/ip_api.py` | File | IP address client | ~37 |
-| `docs/` | Directory | All project documentation | - |
+| Path | Type | Purpose |
+|------|------|---------|
+| `main.py` | File | Application entry point, initializes LCD, modules, and main loop |
+| `config.py` | File | Centralized configuration for all modules and app settings |
+| `launcher.sh` | File | Shell script for launching the application (used by systemd) |
+| `requirements.txt` | File | Python package dependencies |
+| `modules/` | Directory | Contains all display modules |
+| `modules/base.py` | File | Abstract base class for all modules |
+| `modules/weather.py` | File | Weather and time display module |
+| `modules/crypto.py` | File | Cryptocurrency price display module |
+| `modules/fear_greed.py` | File | Fear & Greed Index display module |
+| `modules/alt_season.py` | File | Altcoin Season module (7d + 30d, 2 screens) |
+| `modules/market_cap.py` | File | Total market cap display module |
+| `clients/` | Directory | API client functions for external APIs |
+| `clients/weather_api.py` | File | WeatherAPI client |
+| `clients/crypto_api.py` | File | CoinGecko prices client |
+| `clients/fear_greed_api.py` | File | Fear & Greed Index client |
+| `clients/altcoin_season_api.py` | File | Altcoin Season Index calculator (7d + 30d via CoinGecko) |
+| `clients/market_cap_api.py` | File | Global market cap client |
+| `clients/ip_api.py` | File | IP address client |
+| `docs/` | Directory | All project documentation |
 
 ---
 
