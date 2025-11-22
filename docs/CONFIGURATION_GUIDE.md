@@ -495,7 +495,7 @@ MARKET_CAP_MODULE_CONFIG = {
 
 ```python
 APP_CONFIG = {
-    'version': 'V2.0.0',
+    'version': 'V1.0.0',
     'connection_timeout': 10,
     'retry_delay': 5
 }
@@ -505,7 +505,7 @@ APP_CONFIG = {
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `version` | str | `'V2.0.0'` | Application version (displayed on startup) |
+| `version` | str | `'V1.0.0'` | Application version (displayed on startup) |
 | `connection_timeout` | int | `10` | Network connection timeout (seconds) |
 | `retry_delay` | int | `5` | Delay before retry on error (seconds) |
 

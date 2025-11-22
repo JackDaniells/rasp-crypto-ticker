@@ -107,7 +107,7 @@ BTC_DOMINANCE_MODULE_CONFIG = {
 # APPLICATION CONFIGURATION
 # ============================================================================
 APP_CONFIG = {
-    'version': 'V2.0.0',
+    'version': 'V1.0.0',
     'connection_timeout': 10,
     'retry_delay': 5
 }
