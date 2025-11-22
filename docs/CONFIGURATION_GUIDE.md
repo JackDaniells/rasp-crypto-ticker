@@ -107,6 +107,8 @@ MARKET_CAP_MODULE_CONFIG['update_interval'] = 1800
 
 ## ⚙️ Configuration Sections
 
+> **📖 Module Details:** For information about what each module displays and how it works, see the [ARCHITECTURE_GUIDE.md](ARCHITECTURE_GUIDE.md). This guide focuses on configuration only.
+
 ### 1. LCD Hardware Configuration
 
 ```python
@@ -174,14 +176,6 @@ WEATHER_MODULE_CONFIG = {
 | `lcd_max_size` | int | `16` | LCD character width |
 | `temperature_unit` | str | `'C'` | Temperature display unit: `'C'` (Celsius) or `'F'` (Fahrenheit) |
 
-**Display Screens:**
-1. Location (City, Country)
-2. Temperature (°C or °F, based on config)
-3. Feels Like temperature (°C or °F, based on config)
-4. Weather condition
-
-**Total Display Time:** 4 screens × 10 seconds = **40 seconds**
-
 **API Key Setup:**
 
 1. Get free API key from: https://www.weatherapi.com/
@@ -198,14 +192,6 @@ Environment="WEATHER_API_KEY=your_api_key_here"
 echo 'export WEATHER_API_KEY=your_api_key_here' >> ~/.bashrc
 source ~/.bashrc
 ```
-
-**Features:**
-- Auto-detects location via IP address
-- Shows location (city and country)
-- Configurable temperature unit (Celsius or Fahrenheit)
-- Shows actual and "feels like" temperature
-- Shows weather condition (Sunny, Cloudy, etc.)
-- Updates every 10 minutes (configurable)
 
 **API Usage:**
 - Free tier: ~1M calls/month
@@ -246,8 +232,8 @@ CRYPTO_MODULE_CONFIG = {
 
 **Display Format (per coin):**
 ```
-Row 0: 14:30      +5.2%  (time + 24h change)
-Row 1: BTC:     $95432  (acronym + price)
+14:30        +5.2%
+BTC:       $95432
 ```
 
 **Total Display Time:** N coins × 10 seconds (N = number in `symbols`)
@@ -359,8 +345,8 @@ FEAR_GREED_MODULE_CONFIG = {
 
 **Display Format:**
 ```
-HH:MM    F&G Index
-  45: Fear
+Fear & Greed Idx
+  68 - Greed
 ```
 
 **Index Values:**
@@ -405,46 +391,25 @@ ALT_SEASON_MODULE_CONFIG = {
 
 Screen 1 (7-day):
 ```
-  AltSeason 7d
+Alt Season (07d)
   53% - Mixed
 ```
 
 Screen 2 (30-day):
 ```
- AltSeason 30d
+Alt Season (30d)
   56% - Mixed
 ```
 
-**Season Indicators:**
-- **Alt Season**: 75% or more of top 100 coins outperform Bitcoin
-- **BTC Season**: 25% or fewer outperform Bitcoin
-- **Mixed**: Between 25-75%
+**Season Thresholds:**
+- **Alt Season**: ≥75%
+- **BTC Season**: ≤25%
+- **Mixed**: 25-75%
 
-**What it shows:**
-- **Screen 1**: 7-day Altcoin Season Index with classification
-- **Screen 2**: 30-day Altcoin Season Index with classification
-- **Top line**: "AltSeason" + timeframe (7d or 30d) - centered
-- **Bottom line**: Percentage + season classification - centered
-- **7d metric**: Short-term trend (1 week performance comparison)
-- **30d metric**: Medium-term trend (1 month performance comparison)
-- **Index meaning**: What percentage of the top 100 altcoins performed better than Bitcoin
-
-**Implementation Details:**
-- **Source**: CoinGecko API (same as other modules)
-- **Calculation**: Self-calculated from CoinGecko market data
-- **Method**: Fetches top 100 coins with 7d and 30d price changes, compares each against Bitcoin
-- **Dual screens**: Shows two separate screens, each with its own season classification
-- **No API key required** (uses CoinGecko free tier)
-- **Updates**: Every 10 minutes (configurable)
-- **Time**: Instant (single API call)
-- **Rate limit**: Shares CoinGecko rate limits with other modules (10-50 calls/minute)
-
-**Use Cases:**
-- **Trading strategy**: Indicates when to focus on altcoins vs Bitcoin
-- **Market timing**: Helps identify optimal entry/exit points for altcoins
-- **Risk management**: High index = altcoin gains, low index = Bitcoin dominance
-- **Portfolio rebalancing**: Use to adjust Bitcoin vs altcoin allocation
-- **Momentum indicator**: 30-day performance trend shows recent market direction
+**API Details:**
+- **Source**: CoinGecko API (no API key required)
+- **Calculation**: Self-calculated from top 100 coins price data
+- **Displays**: Two screens (7-day and 30-day metrics)
 
 ---
 
@@ -472,44 +437,21 @@ BTC_DOMINANCE_MODULE_CONFIG = {
 
 **Display Format:**
 ```
- BTC Dominance
-56% - Very High
+  BTC Dominance
+ 56% - Very High
 ```
 
-**Status Classifications:**
-- **V.High**: 55% or higher (Strong Bitcoin dominance)
-- **High**: 50-54.9% (Bitcoin dominance)
-- **Moderate**: 45-49.9% (Balanced market)
-- **Low**: 40-44.9% (Altcoin-friendly)
-- **V.Low**: Below 40% (Strong altcoin environment)
+**Status Thresholds:**
+- **Very High**: ≥55%
+- **High**: 50-54.9%
+- **Moderate**: 45-49.9%
+- **Low**: 40-44.9%
+- **Very Low**: <40%
 
-**What it shows:**
-- **Top line**: "BTC Dominance" title (centered)
-- **Bottom line**: Dominance percentage and status (centered)
-- **Dominance**: What percentage of total crypto market cap is Bitcoin
-
-**Implementation Details:**
-- **Source**: CoinGecko Global API (shared with Market Cap module)
-- **Calculation**: (Bitcoin Market Cap / Total Crypto Market Cap) × 100
-- **API Efficiency**: Single API call serves both Market Cap and BTC Dominance modules
-- **Caching**: Results cached for 60 seconds to prevent duplicate requests
-- **No API key required** (uses CoinGecko free tier)
+**API Details:**
+- **Source**: CoinGecko Global API (no API key required)
+- **Shares cache**: With Market Cap module (single API call serves both)
 - **Updates**: Every 10 minutes (configurable)
-- **Time**: Instant (single cached API call)
-- **Rate limit**: Reduced consumption due to caching (10-50 calls/minute shared)
-
-**Market Interpretation:**
-- **>55% (Very High)**: Bitcoin Season - BTC outperforming altcoins
-- **50-55% (High)**: BTC dominant - safer to hold Bitcoin
-- **45-50% (Moderate)**: Balanced market - diversification recommended
-- **40-45% (Low)**: Altcoin-friendly - good for alt positions
-- **<40% (Very Low)**: Altcoin Season - alts outperforming BTC significantly
-
-**Use Cases:**
-- **Market sentiment**: Higher dominance = risk-off, lower = risk-on
-- **Trading strategy**: High dominance = focus on BTC, low = explore altcoins
-- **Risk management**: Complements Altcoin Season index for market timing
-- **Portfolio allocation**: Helps decide BTC vs altcoin weight
 
 ---
 
@@ -537,30 +479,15 @@ MARKET_CAP_MODULE_CONFIG = {
 | `timeout` | int | `10` | API request timeout (seconds) |
 | `max_failed_attempts` | int | `3` | API failures before showing error |
 
-**Display Format:**
-```
-HH:MM       +2.5%
-Mkt. Cap:       $1.2T
-```
-
-**What it shows:**
-- **Top line**: Current time and 24h change percentage
-- **Bottom line**: Total crypto market capitalization
-  - **T** = Trillions (e.g., $1.2T = $1,200,000,000,000)
-  - **B** = Billions (e.g., $450B = $450,000,000,000)
-  - **M** = Millions (rarely seen for total market cap)
+**Number Format:**
+- **T** = Trillions (e.g., $1.2T)
+- **B** = Billions (e.g., $450B)
+- **M** = Millions (e.g., $50M)
 
 **API Details:**
-- **Source**: CoinGecko (same as crypto prices)
-- **Endpoint**: https://api.coingecko.com/api/v3/global
-- **No API key required**
-- **Updates**: Real-time (as frequently as configured)
-- **Rate limit**: 10-50 calls/minute (shared with crypto module)
-
-**Use Cases:**
-- **Bull market indicator**: Rising market cap = growing market
-- **Market health**: Compare with individual coin performance
-- **Risk assessment**: Sudden drops indicate market-wide correction
+- **Source**: CoinGecko Global API (no API key required)
+- **Shares cache**: With Bitcoin Dominance module
+- **Updates**: Every 10 minutes (configurable)
 
 ---
 

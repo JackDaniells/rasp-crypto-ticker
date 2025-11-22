@@ -556,6 +556,8 @@ WeatherTimeModule     CryptoTickerModule
 
 ## 📦 Existing Modules
 
+> **⚙️ Configuration:** For configuration options, parameters, and setup instructions for each module, see the [CONFIGURATION_GUIDE.md](CONFIGURATION_GUIDE.md). This section focuses on architecture and implementation.
+
 ### Weather & Time Module
 
 **File**: `modules/weather_time.py`
@@ -616,8 +618,8 @@ WEATHER_MODULE_CONFIG = {
 
 **Display Format (per crypto):**
 ```
-Row 0: HH:MM          +5.2%
-Row 1: BTC:        $95432
+14:30        +5.2%
+BTC:       $95432
 ```
 
 **Configuration:**

@@ -329,8 +329,6 @@ cd /path_to_folder/rasp-crypto-ticker
 python main.py
 ```
 
-Or use cron for autostart (see [SYSTEMD_SETUP.md](SYSTEMD_SETUP.md) for alternatives).
-
 ---
 
 ## 🔧 Customization
@@ -497,6 +495,8 @@ Only if you explicitly expose it. By default:
 - Runs locally on your Pi
 - No network services listening
 - No remote access
+
+To enable remote access to your Raspberry Pi (SSH, VNC, etc.), see the [official Raspberry Pi remote access guide](https://www.raspberrypi.com/documentation/computers/remote-access.html).
 
 ---
 

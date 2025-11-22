@@ -11,8 +11,8 @@ This project turns your Raspberry Pi into an always-on information display that 
 - **📊 Live Cryptocurrency Prices**: Track Bitcoin, Ethereum, Solana, or any cryptocurrency from CoinGecko API, displaying current price and 24-hour change percentage.
 - **🌡️ Real-Time Weather**: Automatically detects your location via IP and displays location name, current temperature (configurable Celsius/Fahrenheit), feels-like temperature, and weather conditions using WeatherAPI.
 - **😨 Fear & Greed Index**: Market sentiment indicator showing current index value and classification (Extreme Fear to Extreme Greed).
-- **₿ Bitcoin Dominance**: Shows Bitcoin's market dominance percentage (% of total crypto market cap), with status classification (V.High/High/Moderate/Low/V.Low).
-- **🔄 Altcoin Season Index**: Shows what percentage of top 100 coins outperformed Bitcoin in the last 7 days and 30 days (displays two separate screens), determining if it's Altcoin Season (≥75%), Bitcoin Season (≤25%), or Mixed (25-75%).
+- **₿ Bitcoin Dominance**: Shows Bitcoin's market dominance percentage (% of total crypto market cap).
+- **🔄 Altcoin Season Index**: Shows what percentage of top 100 coins outperformed Bitcoin in the last 7 days and 30 days.
 - **💎 Market Cap**: Total cryptocurrency market capitalization with 24h change percentage.
 - **🕐 Current Date & Time**: Shows the current date and time on each screen.
 
@@ -80,13 +80,7 @@ This project was developed and tested on a **Raspberry Pi 4** with a **16x2 LCD 
   - 16 characters × 2 rows (standard HD44780 controller)
   - Typical I2C address: `0x27` or `0x3F`
   - Operating voltage: 5V (powered by Raspberry Pi)
-- **4 Female-to-Female Jumper Wires** (for I2C connection)
 - **Power Supply**: 5V/2.5A+ USB-C for Pi 4 (or appropriate for your model)
-
-**Why This Hardware?**
-- **Pi 4**: Powerful enough for API calls and display control while remaining energy-efficient
-- **I2C LCD**: Simplifies wiring (4 wires vs 16+ pins) and conserves GPIO pins
-- **16x2 Display**: Perfect balance between information density and readability for a ticker display
 
 ### Wiring Diagram
 
@@ -142,7 +136,7 @@ See **[I2C_SETUP.md](docs/I2C_SETUP.md)** for step-by-step instructions, trouble
 
 ### Installation
 
-> ⚠️ **Prerequisites**: Make sure you completed the [Hardware Setup](#-hardware-setup) section first (I2C enabled, libraries installed)!
+> ⚠️ **Prerequisites**: Make sure you completed the [Hardware Setup](#-hardware-setup) section first (I2C enabled, external libraries set)!
 
 **1. Install Python Dependencies:**
 
@@ -151,15 +145,18 @@ pip install -r requirements.txt
 ```
 
 **Why this library is needed:**  
-- **`RPLCD`**: Python library that provides an easy interface to control LCD displays. It handles all the low-level communication with the LCD module, so you don't have to write bit manipulation code yourself.
+- **`RPLCD`**: Python library to control LCD displays via I2C interface.
+- **`requests`**: HTTP library for making API calls to CoinGecko, WeatherAPI, and other services.
 
 **2. Set up Weather API Key:**
+
+The weather module requires an API key to fetch weather data. Get your free API key at: https://www.weatherapi.com/
 
 ```bash
 export WEATHER_API_KEY="your_api_key_here"
 ```
 
-Get your free API key at: https://www.weatherapi.com/
+> **Note:** If you don't want to use the weather module, you can disable it in `config.py` by setting `'enabled': False` in `WEATHER_MODULE_CONFIG`.
 
 **3. Run the project:**
 
@@ -206,22 +203,26 @@ rasp-crypto-ticker/
 ├── config.py         ← Centralized configuration (all settings in one file)
 │
 ├── clients/          ← API Client Layer (HTTP communication)
-│   ├── __init__.py             → Exports all client functions
-│   ├── weather_api.py          → WeatherAPI endpoint (returns data or None)
-│   ├── crypto_api.py           → CoinGecko API endpoint (returns data or None)
+│   ├── weather_api.py          → WeatherAPI endpoint
+│   ├── crypto_api.py           → CoinGecko API endpoint
 │   ├── fear_greed_api.py       → Fear & Greed Index endpoint
 │   ├── market_cap_api.py       → Global market cap endpoint
 │   ├── altcoin_season_api.py   → Altcoin Season Index endpoint
-│   └── ip_api.py               → IP address endpoint (returns IP or None)
+│   └── ip_api.py               → external IP address endpoint 
 │
 ├── modules/          ← Display Layer (data presentation)
-│   ├── __init__.py           → Exports all modules
 │   ├── base.py               → Abstract base class (defines module interface)
 │   ├── weather_time.py       → Weather & time display module
 │   ├── crypto_ticker.py      → Cryptocurrency price ticker module
 │   ├── fear_greed.py         → Fear & Greed Index display module
 │   ├── alt_season.py         → Altcoin Season module
+│   ├── btc_dominance.py      → Bitcoin Dominance module
 │   └── market_cap.py         → Total market cap display module
+│
+├── utils/            ← Utilities (shared helpers and wrappers)
+│   ├── cache.py              → Caching utilities
+│   ├── lcd.py                → LCD wrapper
+│   └── parser.py             → Data formatting
 │
 └── docs/             ← Documentation (setup guides and references)
 ```
@@ -302,7 +303,7 @@ Six ready-to-use modules are included:
 
 **₿ Bitcoin Dominance Module**
 - Displays: Bitcoin's percentage of total crypto market cap
-- Status classification: V.High (≥55%), High (≥50%), Moderate (≥45%), Low (≥40%), V.Low (<40%)
+- Status classification: [Very High (≥55%), High (≥50%), Moderate (≥45%), Low (≥40%), Very Low (<40%)]
 - Updates every 10 minutes (configurable)
 - No API key required (CoinGecko public API)
 - Higher dominance often indicates BTC Season
@@ -314,6 +315,7 @@ Six ready-to-use modules are included:
 - Season thresholds: Alt Season (≥75%), BTC Season (≤25%), Mixed (25-75%)
 - Updates every 10 minutes (configurable)
 - No API key required (CoinGecko public API)
+- **Note:** Data is calculated locally by comparing price changes of top 100 coins vs Bitcoin
 
 **💎 Market Cap Module**
 - Displays: Total cryptocurrency market capitalization
@@ -342,8 +344,8 @@ Six ready-to-use modules are included:
 **Fear & Greed Index Module:**
 ```
 ┌────────────────┐
-│14:30  F&G Index│ ← Current time + Title
-│   68: Greed    │ ← Index value + Classification
+│Fear & Greed Idx│ ← Title (centered)
+│  68 - Greed    │ ← Index value + Classification (centered)
 └────────────────┘
 ```
 
@@ -351,39 +353,24 @@ Six ready-to-use modules are included:
 ```
 ┌────────────────┐
 │ BTC Dominance  │ ← Title (centered)
-│56.58% - V.High │ ← Dominance % + Status (centered)
+│56% - Very High │ ← Dominance % + Status (centered)
 └────────────────┘
 ```
 
-**Altcoin Season Module (2 screens):**
+**Altcoin Season Module:**
 
-Screen 1 (7-day):
 ```
 ┌────────────────┐
-│  AltSeason 7d  │ ← Title + Timeframe (centered)
-│  53% - Mixed   │ ← Percentage + Season (centered)
+│Alt Season (07d)│ ← Title + Timeframe (centered)
+│ 53% - Mixed    │ ← Percentage + Season (centered)
 └────────────────┘
 ```
-
-Screen 2 (30-day):
-```
-┌────────────────┐
-│ AltSeason 30d  │ ← Title + Timeframe (centered)
-│  56% - Mixed   │ ← Percentage + Season (centered)
-└────────────────┘
-```
-
-**Note**: 
-- API returns both metrics: `{'value_7d': 53, 'value_30d': 56, 'timestamp': ...}`
-- 7d shows short-term trend (1 week)
-- 30d shows medium-term trend (1 month)
-- Each gets its own screen with season classification
 
 **Market Cap Module:**
 ```
 ┌────────────────┐
 │14:30      +2.5%│ ← Current time + 24h Change
-│MCap:      $1.2T│ ← Label + Total Market Cap
+│Mtk. Cap:  $1.2T│ ← Label + Total Market Cap
 └────────────────┘
 ```
 
