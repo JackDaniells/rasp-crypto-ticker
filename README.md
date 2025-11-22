@@ -430,6 +430,7 @@ Have questions? Check the comprehensive FAQ for answers!
 ## 📚 Additional Resources
 
 - **Project Documentation**:
+  - [CHANGELOG.md](CHANGELOG.md) - Version history and release notes
   - [ARCHITECTURE_GUIDE.md](docs/ARCHITECTURE_GUIDE.md) - Project structure, architecture, and module development
   - [I2C_SETUP.md](docs/I2C_SETUP.md) - Complete I2C setup and troubleshooting guide
   - [CONFIGURATION_GUIDE.md](docs/CONFIGURATION_GUIDE.md) - Complete configuration guide
